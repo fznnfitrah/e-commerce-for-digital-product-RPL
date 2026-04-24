@@ -1,58 +1,97 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# J-Store Digital Asset E-Commerce
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+J-Store adalah platform e-commerce berbasis web untuk penjualan aset digital (Top-up game, PPOB, Akun Premium, dan E-book) dengan fitur unggulan **Guest Checkout**.
 
-## About Laravel
+## 🚀 Panduan Setup Project (Non-Docker / Local)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Panduan ini ditujukan bagi anggota tim yang menggunakan environment lokal (seperti XAMPP, Laragon, atau PHP & MySQL terinstall langsung).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Prasyarat Sistem
+* **PHP**: ^8.3
+* **Composer**: Latest
+* **MySQL**: 8.0 atau MariaDB terbaru
+* **Node.js & NPM**: Untuk manajemen aset frontend
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Langkah Instalasi
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/fznnfitrah/e-commers-for-digital-product-RPL.git
+   cd e-commers-for-digital-product-RPL
+   ```
 
-## Learning Laravel
+2. **Install Dependencies**
+   ```bash
+   composer install
+   npm install
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. **Konfigurasi Environment**
+   Salin file `.env.example` menjadi `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Buka file `.env` dan sesuaikan bagian database:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=j_store
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+4. **Generate Key & Migration**
+   ```bash
+   php artisan key:generate
+   php artisan migrate
+   ```
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+5. **Jalankan Aplikasi**
+   ```bash
+   php artisan serve
+   # Di terminal terpisah, jalankan untuk frontend:
+   npm run dev
+   ```
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 🏗️ Struktur Logika Pengembangan
 
-```bash
-composer require laravel/boost --dev
+Agar pengembangan fitur berjalan paralel tanpa konflik kode, kita akan mengikuti pola **Service Pattern**. Artinya, Controller hanya bertugas menerima input, sementara logika berat ada di folder `Services`.
 
-php artisan boost:install
-```
+### 1. Alur Checkout (Guest vs Member)
+Logika ini akan berada di `app/Services/OrderService.php`.
+* **Member**: Sistem mengambil data Nama, Email, dan No HP dari database `users`.
+* **Guest**: User wajib mengisi form identitas. Data ini disimpan langsung ke tabel `transactions` meskipun `user_id` bernilai `null`.
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Integrasi Payment Gateway (Midtrans)
+Logika ini berada di `app/Services/PaymentService.php`.
+* Mengirim data transaksi ke Midtrans.
+* Mendapatkan `snap_token` untuk menampilkan pop-up pembayaran.
+* Menangani **Webhook/Callback** untuk mengubah status pembayaran dari `pending` ke `success`.
 
-## Contributing
+### 3. Otomatisasi Pengiriman Produk
+Sistem akan menggunakan **Event & Listener** untuk menjaga kode tetap bersih:
+* **Event**: `PaymentReceived` dipicu saat status transaksi menjadi `success`.
+* **Listener**: `DeliverDigitalAsset` akan:
+    1. Mengambil kredensial dari tabel `digital_assets` yang `is_sold = false`.
+    2. Menandai aset sebagai `is_sold = true`.
+    3. Mengirimkan data kredensial tersebut ke email pembeli via `Mail`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Fitur Lacak Pesanan (Track Order)
+Fitur publik yang memungkinkan pembeli (terutama Guest) melihat status pesanan tanpa login.
+* **Input**: `Transaction ID` + `Customer Email`.
+* **Logic**: Mencocokkan kedua data tersebut di tabel `transactions` untuk keamanan data.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🛠️ Aturan Kolaborasi (Git & DB)
 
-## License
+1. **Jangan Edit Database Manual**: Selalu gunakan migrasi (`php artisan make:migration`).
+2. **Commit yang Jelas**: Gunakan prefix seperti `feat:` untuk fitur baru, `fix:` untuk perbaikan bug, atau `refactor:` untuk merapikan kode.
+3. **Pull Before Push**: Selalu lakukan `git pull origin main` sebelum melakukan push untuk menghindari konflik migrasi.
+4. **Environment**: File `.env` dilarang di-push ke GitHub. Gunakan `.env.example` untuk berbagi variabel baru.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
