@@ -1,4 +1,4 @@
-<footer class="bg-gradient-to-r from-purple-900 to-pink-900 mt-20 py-12">
+<footer class="bg-linear-to-r from-purple-900 to-pink-900 mt-20 py-12">
     <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
             <h4 class="text-xl font-bold mb-4">J-Store</h4>
