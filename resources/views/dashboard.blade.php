@@ -77,7 +77,7 @@
             @for($i = 1; $i <= 5; $i++)
             <div class="glass-card rounded-2xl overflow-hidden hover:scale-105 transition group">
                 <div class="h-48 bg-gray-700">
-                    <!-- <img src="https://via.placeholder.com/150x200" class="w-full h-full object-cover"> -->
+                    <img src="images/game/game top-up-{{ $i }}.png" class="w-full h-full object-cover">
                 </div>
                 <div class="p-3 text-center">
                     <p class="font-bold text-sm">Game Title {{ $i }}</p>
@@ -107,7 +107,7 @@
             @for($i = 1; $i <= 5; $i++)
             <div class="glass-card rounded-2xl overflow-hidden hover:scale-105 transition group">
                 <div class="h-48 bg-gray-700">
-                    <!-- <img src="https://via.placeholder.com/150x200" class="w-full h-full object-cover"> -->
+                    <img src="images/e- book/ebook-{{ $i }}.png" class="w-full h-full object-cover">
                 </div>
                 <div class="p-3 text-center">
                     <p class="font-bold text-sm">Game Title {{ $i }}</p>
