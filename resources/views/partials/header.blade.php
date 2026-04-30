@@ -12,12 +12,36 @@
             <input type="text" placeholder="Cari produk..." class="w-full bg-gray-800 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
         </div>
 
-        <div class="flex gap-4">
+        <div class="flex items-center gap-6">
             @guest
-                <a href="#" class="bg-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">Masuk</a>
+                <a href="{{ route('login') }}" class="bg-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">Masuk</a>
             @else
-                <span class="text-blue-400">Halo, {{ auth()->user()->name }}</span>
+                <div class="flex items-center gap-4">
+                    {{-- Bagian Teks & Link Admin --}}
+                    <div class="flex flex-col items-end leading-tight">
+                        <span class="text-blue-400 font-bold text-sm">Halo, {{ auth()->user()->name }}</span>
+                        
+                        @if(auth()->user()->role === 'admin')
+                            <a href="{{ route('admin.dashboard') }}" class="text-[10px] text-yellow-500 hover:text-yellow-400 font-bold uppercase tracking-tighter transition-colors">
+                                Ke Panel Admin
+                            </a>
+                        @endif
+                    </div>
+
+                    {{-- Garis Pembatas Vertikal --}}
+                    <div class="h-8 w-[1px] bg-white/10"></div>
+
+                    {{-- Tombol Keluar --}}
+                    <form action="{{ route('logout') }}" method="POST" class="m-0">
+                        @csrf
+                        <button type="submit" class="text-sm font-medium text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2 group">
+                            <span>Keluar</span>
+                            <span class="group-hover:translate-x-1 transition-transform">→</span>
+                        </button>
+                    </form>
+                </div>
             @endguest
         </div>
+
     </div>
 </nav>
