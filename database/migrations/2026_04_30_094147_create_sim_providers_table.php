@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('digital_assets', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id')->constrained();
-            $table->json('credential_data'); // Store {email: '...', pass: '...'} or {file: 'path'}
-            $table->boolean('is_sold')->default(false);
+        Schema::create('sim_providers', function (Blueprint $table) {
+            $table->id('id_provider');
+            $table->string('nama_provider');
+            $table->string('prefix_nomor'); // Contoh: 0812, 0878
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('digital_assets');
+        Schema::dropIfExists('sim_providers');
     }
 };
