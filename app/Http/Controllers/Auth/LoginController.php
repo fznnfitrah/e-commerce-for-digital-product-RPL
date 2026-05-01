@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -8,41 +7,35 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    // Menampilkan halaman login
-    public function showLoginForm()
+    // Menampilkan halaman auth (Login & Register Slide)
+    public function showAuthForm()
     {
-        return view('auth.login');
+        return view('auth.auth');
     }
 
-    // Memproses data login
     public function login(Request $request)
     {
-        // 1. Validasi input
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // 2. Coba proses Login
-        // 'remember' opsional, bisa diambil dari $request->has('remember')
-        if (Auth::attempt($credentials, $request->remember)) {
-            $request->session()->regenerate();
+        try {
+            if (Auth::attempt($credentials, $request->remember)) {
+                $request->session()->regenerate();
 
-            // 3. Logika Redirect berdasarkan Role
-            if (Auth::user()->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
+                // Redirect berdasarkan role
+                return Auth::user()->role === 'admin' 
+                    ? redirect()->intended('/admin/') 
+                    : redirect()->intended('/');
             }
-
-            return redirect()->intended('/');
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['email' => 'Format keamanan akun tidak valid.'])->onlyInput('email');
         }
 
-        // 4. Jika gagal, kembalikan dengan pesan error
-        return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => 'Email atau password salah.'])->onlyInput('email');
     }
 
-    // Proses Logout
     public function logout(Request $request)
     {
         Auth::logout();
