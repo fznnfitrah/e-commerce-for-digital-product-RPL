@@ -1,193 +1,135 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - J-Store</title>
+@extends('layouts.admin')
 
-    @vite('resources/css/app.css')
-</head>
+@section('title', 'Dashboard')
+@section('header_title', 'Ringkasan Statistik')
+@section('header_subtitle', 'Selamat datang kembali, Admin J-Store.')
 
-<body class="bg-[#0a0a0a] text-white overflow-hidden">
+@section('content')
+{{-- STAT CARDS SECTION --}}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
-<div class="flex min-h-screen">
-
-    {{-- SIDEBAR --}}
-    <aside class="w-64 bg-black/60 backdrop-blur-xl border-r border-white/10 p-6 flex flex-col">
-
-        <div class="mb-10">
-            <h1 class="text-2xl font-black italic tracking-tighter uppercase">
-                J-<span class="text-[#DFFF00]">ADMIN</span>
-            </h1>
+    <!-- Total Produk -->
+    <div class="bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md hover:border-blue-500/50 transition-all group">
+        <div class="flex justify-between items-start mb-4">
+            <span class="text-2xl">📦</span>
+            <span class="text-[10px] font-black text-blue-400 bg-blue-400/10 px-2 py-1 rounded-lg uppercase tracking-widest">Katalog</span>
         </div>
+        <p class="text-gray-400 text-xs uppercase font-bold tracking-tighter mb-1">Total Produk</p>
+        <h3 class="text-4xl font-black group-hover:text-blue-400 transition-colors">{{ $total_produk }}</h3>
+    </div>
 
-        <nav class="flex-1 space-y-2">
-
-            <a href="{{ route('admin.dashboard') }}"
-               class="flex items-center gap-3 p-3 bg-blue-600 rounded-xl font-bold">
-                <span>📊</span> Dashboard
-            </a>
-
-            <a href="{{ route('admin.produk.create') }}"
-               class="flex items-center gap-3 p-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition">
-                <span>📦</span> Tambah Produk
-            </a>
-
-            <a href="#"
-               class="flex items-center gap-3 p-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition">
-                <span>📂</span> Kategori
-            </a>
-
-            <a href="#"
-               class="flex items-center gap-3 p-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition">
-                <span>🎟️</span> Promo & Voucher
-            </a>
-
-            <a href="#"
-               class="flex items-center gap-3 p-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition">
-                <span>🧾</span> Riwayat Transaksi
-            </a>
-
-        </nav>
-
-        <div class="pt-6 border-t border-white/10">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit"
-                        class="flex items-center gap-3 p-3 text-red-400 hover:bg-red-500/10 rounded-xl w-full transition">
-                    <span>🚪</span> Logout
-                </button>
-            </form>
+    <!-- Total Order -->
+    <div class="bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md hover:border-blue-500/50 transition-all group">
+        <div class="flex justify-between items-start mb-4">
+            <span class="text-2xl">🛒</span>
+            <span class="text-[10px] font-black text-purple-400 bg-purple-400/10 px-2 py-1 rounded-lg uppercase tracking-widest">Pesanan</span>
         </div>
+        <p class="text-gray-400 text-xs uppercase font-bold tracking-tighter mb-1">Total Order</p>
+        <h3 class="text-4xl font-black text-blue-500 group-hover:text-white transition-colors">{{ $total_transaksi }}</h3>
+    </div>
 
-    </aside>
-
-
-    {{-- MAIN CONTENT --}}
-    <main class="flex-1 p-10 overflow-y-auto relative">
-
-        {{-- Background glow --}}
-        <div class="absolute inset-0 opacity-30 pointer-events-none">
-            <img src="{{ asset('images/hero-bg.png') }}" class="w-full h-full object-cover">
+    <!-- Pelanggan -->
+    <div class="bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md hover:border-blue-500/50 transition-all group">
+        <div class="flex justify-between items-start mb-4">
+            <span class="text-2xl">👥</span>
+            <span class="text-[10px] font-black text-green-400 bg-green-400/10 px-2 py-1 rounded-lg uppercase tracking-widest">User</span>
         </div>
+        <p class="text-gray-400 text-xs uppercase font-bold tracking-tighter mb-1">Pelanggan</p>
+        <h3 class="text-4xl font-black text-purple-500 group-hover:text-white transition-colors">{{ $total_user }}</h3>
+    </div>
 
-        <div class="relative z-10">
-
-            {{-- HEADER --}}
-            <header class="flex justify-between items-center mb-10">
-                <div>
-                    <h2 class="text-3xl font-bold">Ringkasan Statistik</h2>
-                    <p class="text-gray-400">Selamat datang kembali, Admin J-Store.</p>
-                </div>
-
-                <div class="bg-white/5 px-4 py-2 rounded-lg border border-white/10">
-                    <span class="text-sm text-gray-400">{{ now()->format('d M Y') }}</span>
-                </div>
-            </header>
-
-
-            {{-- STAT CARDS --}}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-
-                <div class="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md">
-                    <p class="text-gray-400 text-sm uppercase font-bold mb-2">Total Produk</p>
-                    <h3 class="text-4xl font-black">{{ $total_produk }}</h3>
-                </div>
-
-                <div class="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md">
-                    <p class="text-gray-400 text-sm uppercase font-bold mb-2">Total Order</p>
-                    <h3 class="text-4xl font-black text-blue-500">{{ $total_transaksi }}</h3>
-                </div>
-
-                <div class="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md">
-                    <p class="text-gray-400 text-sm uppercase font-bold mb-2">Pelanggan</p>
-                    <h3 class="text-4xl font-black text-purple-500">{{ $total_user }}</h3>
-                </div>
-
-                <div class="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-md">
-                    <p class="text-gray-400 text-sm uppercase font-bold mb-2">Pendapatan</p>
-                    <h3 class="text-2xl font-black text-green-400">
-                        Rp {{ number_format($pendapatan, 0, ',', '.') }}
-                    </h3>
-                </div>
-
-            </div>
-
-
-            {{-- TABLE --}}
-            <section class="bg-white/5 rounded-3xl border border-white/10 overflow-hidden backdrop-blur-md">
-
-                <div class="p-6 border-b border-white/10 flex justify-between items-center">
-                    <h3 class="font-bold text-xl uppercase tracking-tighter">
-                        Transaksi Terakhir
-                    </h3>
-                    <a href="#" class="text-blue-400 text-xs hover:underline font-bold">
-                        Lihat Semua
-                    </a>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-
-                        <thead class="bg-white/5 text-gray-400 text-xs uppercase">
-                        <tr>
-                            <th class="p-4">Produk</th>
-                            <th class="p-4">Kontak Pelanggan</th>
-                            <th class="p-4">Target</th>
-                            <th class="p-4">Total</th>
-                            <th class="p-4">Status</th>
-                        </tr>
-                        </thead>
-
-                        <tbody class="divide-y divide-white/5">
-                        @forelse($recent_orders as $order)
-                            <tr class="hover:bg-white/5 text-sm">
-
-                                <td class="p-4 font-bold">
-                                    {{ $order->produk->nama_produk ?? 'N/A' }}
-                                </td>
-
-                                <td class="p-4 text-gray-400">
-                                    {{ $order->kontak_pelanggan }}
-                                </td>
-
-                                <td class="p-4 italic">
-                                    {{ $order->id_target }} ({{ $order->id_server ?? '-' }})
-                                </td>
-
-                                <td class="p-4 font-bold text-blue-400">
-                                    Rp {{ number_format($order->total_akhir, 0, ',', '.') }}
-                                </td>
-
-                                <td class="p-4">
-                                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase
-                                        {{ $order->status_pembayaran == 'success'
-                                            ? 'bg-green-500/20 text-green-400'
-                                            : 'bg-yellow-500/20 text-yellow-400' }}">
-                                        {{ $order->status_pembayaran }}
-                                    </span>
-                                </td>
-
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="p-10 text-center text-gray-500 italic">
-                                    Belum ada transaksi masuk.
-                                </td>
-                            </tr>
-                        @endforelse
-                        </tbody>
-
-                    </table>
-                </div>
-
-            </section>
-
+    <!-- Pendapatan -->
+    <div class="bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md hover:border-[#DFFF00]/50 transition-all group">
+        <div class="flex justify-between items-start mb-4">
+            <span class="text-2xl">💰</span>
+            <span class="text-[10px] font-black text-[#DFFF00] bg-[#DFFF00]/10 px-2 py-1 rounded-lg uppercase tracking-widest">Profit</span>
         </div>
-
-    </main>
+        <p class="text-gray-400 text-xs uppercase font-bold tracking-tighter mb-1">Pendapatan</p>
+        <h3 class="text-2xl font-black text-[#DFFF00]">
+            <span class="text-sm font-normal mr-1 italic">Rp</span>{{ number_format($pendapatan, 0, ',', '.') }}
+        </h3>
+    </div>
 
 </div>
 
-</body>
-</html>
+{{-- RECENT TRANSACTIONS SECTION --}}
+<section class="bg-white/5 rounded-[2rem] border border-white/10 overflow-hidden backdrop-blur-md shadow-2xl">
+
+    <div class="p-8 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
+        <div>
+            <h3 class="font-black text-xl uppercase tracking-tighter flex items-center gap-2">
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                Transaksi Terakhir
+            </h3>
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Update aktivitas terbaru hari ini</p>
+        </div>
+        <a href="#" class="px-5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold transition-all">
+            LIHAT SEMUA
+        </a>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+
+            <thead class="bg-black/20 text-gray-400 text-[10px] uppercase tracking-[0.2em] font-black">
+                <tr>
+                    <th class="p-6">Produk</th>
+                    <th class="p-6">Kontak</th>
+                    <th class="p-6">ID Target</th>
+                    <th class="p-6">Total Pembayaran</th>
+                    <th class="p-6">Status</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-white/5">
+                @forelse($recent_orders as $order)
+                <tr class="hover:bg-white/[0.03] transition-all group">
+
+                    <td class="p-6">
+                        <p class="font-bold text-white group-hover:text-blue-400 transition-colors">
+                            {{ $order->produk->nama_produk ?? 'Deleted Product' }}
+                        </p>
+                        <p class="text-[10px] text-gray-500 font-mono">ID: {{ $order->id_transaksi ?? 'TRX-AUTO' }}</p>
+                    </td>
+
+                    <td class="p-6 text-sm text-gray-300">
+                        {{ $order->kontak_pelanggan }}
+                    </td>
+
+                    <td class="p-6">
+                        <span class="text-xs font-mono bg-black/40 px-3 py-1 rounded-lg border border-white/5 italic">
+                            {{ $order->id_target }} @if($order->id_server) <span class="text-blue-500">({{ $order->id_server }})</span> @endif
+                        </span>
+                    </td>
+
+                    <td class="p-6 font-black text-white">
+                        <span class="text-[#DFFF00]">Rp {{ number_format($order->total_akhir, 0, ',', '.') }}</span>
+                    </td>
+
+                    <td class="p-6">
+                        <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest
+                                    {{ $order->status_pembayaran == 'success'
+                                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                        : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' }}">
+                            {{ $order->status_pembayaran }}
+                        </span>
+                    </td>
+
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="p-20 text-center">
+                        <span class="text-4xl block mb-4 opacity-20">📥</span>
+                        <p class="text-gray-500 font-bold uppercase tracking-widest text-xs italic">
+                            Belum ada transaksi yang tercatat.
+                        </p>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+
+        </table>
+    </div>
+
+</section>
+@endsection
