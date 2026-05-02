@@ -1,11 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\ProdukController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Models\Produk;
 
 /*
@@ -14,9 +18,9 @@ use App\Models\Produk;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('dashboard');
-})->name('home');
+
+Route::get('/', [HomeController::class, 'index'])->name('dashboard');
+Route::get('/produk/{id}', [HomeController::class, 'detail'])->name('produk.detail');
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +39,15 @@ Route::controller(RegisterController::class)->group(function () {
     Route::get('/register', fn() => redirect()->route('login'));
     Route::post('/register', 'register')->name('register');
 });
+
+
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
+    ->name('password.request');
+
+// Proses pengiriman link reset password ke email
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+    ->name('password.email');
+
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
@@ -63,4 +76,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/', [KategoriController::class, 'store'])->name('store'); // Menjadi /admin/kategori (POST)
         Route::delete('/{id}', [KategoriController::class, 'destroy'])->name('destroy'); // Menjadi /admin/kategori/{id}
     });
+
+    // Pengelolaan User -> /admin/users/...
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::patch('/{id}/role', [UserController::class, 'updateRole'])->name('updateRole');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+    });
+
+    
 });

@@ -24,6 +24,11 @@
                     <span>📊</span> Dashboard
                 </a>
 
+                <a href="{{ route('admin.users.index') }}"
+                    class="flex items-center gap-3 p-3 {{ request()->routeIs('admin.users.*') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }} rounded-xl transition">
+                    <span>👥</span> Users
+                </a>
+
                 <a href="{{ route('admin.produk.index') }}"
                     class="flex items-center gap-3 p-3 {{ request()->routeIs('admin.produk.*') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }} rounded-xl transition">
                     <span>📦</span> Produk

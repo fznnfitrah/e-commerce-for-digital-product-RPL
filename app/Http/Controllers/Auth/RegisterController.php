@@ -30,6 +30,6 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
-        return redirect('/')->with('success', 'Selamat datang di J-Store!');
+        return redirect()->route('/')->with('success', 'Selamat datang, ' . $user->name . '! Akun Anda berhasil dibuat.');
     }
 }
