@@ -4,7 +4,13 @@
             <h1 class="text-2xl font-bold text-blue-400">J-Store</h1>
             <div class="hidden md:flex gap-6 text-sm">
                 <a href="#" class="hover:text-blue-400">Top Up</a>
-                <a href="#" class="hover:text-blue-400">Riwayat Pembelian</a>
+                
+                {{-- PERBAIKAN DI SINI: Logika Riwayat Pembelian --}}
+                @auth
+                    <a href="#" class="hover:text-blue-400">Riwayat Pembelian</a>
+                @else
+                    <a href="{{ route('login') }}" class="hover:text-blue-400">Riwayat Pembelian</a>
+                @endauth
             </div>
         </div>
         
@@ -17,7 +23,6 @@
                 <a href="{{ route('login') }}" class="bg-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">Masuk</a>
             @else
                 <div class="flex items-center gap-4">
-                    {{-- Bagian Teks & Link Admin --}}
                     <div class="flex flex-col items-end leading-tight">
                         <span class="text-blue-400 font-bold text-sm">Halo, {{ auth()->user()->name }}</span>
                         
@@ -28,10 +33,8 @@
                         @endif
                     </div>
 
-                    {{-- Garis Pembatas Vertikal --}}
                     <div class="h-8 w-[1px] bg-white/10"></div>
 
-                    {{-- Tombol Keluar --}}
                     <form action="{{ route('logout') }}" method="POST" class="m-0">
                         @csrf
                         <button type="submit" class="text-sm font-medium text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2 group">
@@ -42,6 +45,5 @@
                 </div>
             @endguest
         </div>
-
     </div>
 </nav>
