@@ -17,10 +17,8 @@ use App\Models\Produk;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-
-
 Route::get('/', [HomeController::class, 'index'])->name('dashboard');
-Route::get('/produk/{id}', [HomeController::class, 'detail'])->name('produk.detail');
+Route::get('/produk-detail/{id}', [HomeController::class, 'detail'])->name('produk.detail');
 
 /*
 |--------------------------------------------------------------------------

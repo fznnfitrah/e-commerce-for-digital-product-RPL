@@ -51,7 +51,17 @@
             </div>
 
             {{-- SEKSI KANAN: MEDIA --}}
+
             <div class="space-y-6 bg-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-md">
+                @if ($errors->any())
+                <div class="max-w-4xl mx-auto mb-6 bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-2xl text-sm">
+                    <ul class="list-disc ml-5 space-y-1 font-semibold">
+                        @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
                 <h3 class="text-lg font-bold text-[#DFFF00] mb-4 flex items-center gap-2">
                     <span>🖼️</span> Media Produk
                 </h3>
