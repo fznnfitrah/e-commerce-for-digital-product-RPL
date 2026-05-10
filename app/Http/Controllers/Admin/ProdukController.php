@@ -100,7 +100,7 @@ class ProdukController extends Controller
             'nama_produk'      => 'required|string|max:255',
             'deskripsi_produk' => 'required|string',
             'harga_produk'     => 'required|numeric',
-            'gambar'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'gambar'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         // Handle upload gambar baru jika ada
