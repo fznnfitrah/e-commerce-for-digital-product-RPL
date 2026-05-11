@@ -52,7 +52,7 @@
 
     {{-- BACKGROUND GALAXY --}}
     <div class="absolute inset-0">
-        <img src="{{ asset('images/galaxy-bg2.png') }}" class="w-full h-full object-cover" alt="Background">
+        <img src="{{ asset('images/bg2.jpg') }}" class="w-full h-full object-cover" alt="Background">
     </div>
     <div class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
 

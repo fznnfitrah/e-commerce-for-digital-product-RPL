@@ -61,7 +61,7 @@
         {{-- MAIN CONTENT --}}
         <main class="h-screen flex-1 p-10 overflow-y-auto relative"> 
             <div class="absolute inset-0 opacity-40 pointer-events-none">
-                <img src="{{ asset('images/galaxy-bg2.png') }}" class="w-full h-full object-cover">
+                <img src="{{ asset('images/bg2.jpg') }}" class="w-full h-full object-cover">
             </div>
 
             <div class="relative z-10">
