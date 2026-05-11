@@ -20,6 +20,10 @@ use App\Models\Produk;
 Route::get('/', [HomeController::class, 'index'])->name('dashboard');
 Route::get('/produk-detail/{id}', [HomeController::class, 'detail'])->name('produk.detail');
 
+Route::get('/kategori/{nama}', function ($nama) {
+    return view('kategori-all', ['kategori' => $nama]);
+})->name('kategori.all');
+
 /*
 |--------------------------------------------------------------------------
 | Authentication Routes 
