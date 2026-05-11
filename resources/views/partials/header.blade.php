@@ -1,7 +1,9 @@
 <nav class="glass-card sticky top-0 z-50 px-4 py-3">
     <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-8">
-            <h1 class="text-2xl font-bold text-blue-400">J-Store</h1>
+            <a href="{{ route('dashboard') }}">
+                <h1 class="text-2xl font-bold text-blue-400 hover:text-blue-300 transition-colors">J-Store</h1>
+            </a>
             <div class="hidden md:flex gap-6 text-sm">
                 <a href="#" class="hover:text-blue-400">Top Up</a>
                 

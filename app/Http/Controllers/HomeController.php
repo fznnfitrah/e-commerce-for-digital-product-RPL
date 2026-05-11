@@ -28,13 +28,12 @@ class HomeController extends Controller
         $nama = Str::lower($kategori->nama_kategori);
         $items = $kategori->produks;
 
-        // dd($kategori, $nama, $items);
         $view = match (true) {
-            Str::contains($nama, 'book')   => 'produks.ebook-detail',
+            Str::contains($nama, 'book')   => 'produks.e-book.ebook-detail',
             Str::contains($nama, 'akun')   => 'produks.akun-detail',
             Str::contains($nama, 'token')  => 'produks.pln-detail',
             Str::contains($nama, 'pulsa')  => 'produks.pulsa-detail',
-            default                        => 'produks.topup-detail',
+            default                        => 'produks.topup.topup-detail',
         };
 
         return view($view, compact('kategori', 'items'));
