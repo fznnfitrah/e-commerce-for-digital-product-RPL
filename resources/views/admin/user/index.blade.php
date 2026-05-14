@@ -34,11 +34,11 @@
                     </td>
                     <td class="p-6">
                         <div class="flex justify-end items-center gap-3">
-                            
+
                             {{-- TOMBOL EDIT PROFIL (BARU) --}}
-                            <a href="{{ route('admin.users.edit', $user->id) }}" 
-                               class="p-2 bg-white/5 hover:bg-blue-500/20 rounded-lg text-gray-400 hover:text-blue-400 transition-all group/edit" 
-                               title="Edit Detail User">
+                            <a href="{{ route('admin.users.edit', $user->id) }}"
+                                class="p-2 bg-white/5 hover:bg-blue-500/20 rounded-lg text-gray-400 hover:text-blue-400 transition-all group/edit"
+                                title="Edit Detail User">
                                 <span class="text-xs font-bold uppercase tracking-tighter">✏️ Edit</span>
                             </a>
 
@@ -46,7 +46,7 @@
                             <form action="{{ route('admin.users.updateRole', $user->id) }}" method="POST" class="flex items-center">
                                 @csrf
                                 @method('PATCH')
-                                <select name="role" onchange="this.form.submit()" 
+                                <select name="role" onchange="this.form.submit()"
                                     class="bg-black/40 border border-white/10 rounded-lg px-2 py-1.5 text-[10px] font-bold uppercase text-white focus:ring-1 focus:ring-blue-500 outline-none cursor-pointer">
                                     <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
                                     <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
@@ -55,15 +55,15 @@
 
                             {{-- Form Hapus --}}
                             @if($user->id !== auth()->id())
-                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Hapus user ini secara permanen?')">
+                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-2 hover:bg-red-500/20 rounded-lg transition group/btn" title="Hapus User">
+                                <button type="button" class="btn-delete p-2 hover:bg-red-500/20 rounded-lg transition group/btn" title="Hapus User">
                                     <span class="text-red-500 opacity-50 group-hover/btn:opacity-100 text-[10px] font-black uppercase">Hapus</span>
                                 </button>
                             </form>
                             @else
-                                <span class="text-[9px] text-gray-600 font-bold uppercase tracking-tighter px-2 italic">Akun Anda</span>
+                            <span class="text-[9px] text-gray-600 font-bold uppercase tracking-tighter px-2 italic">Akun Anda</span>
                             @endif
 
                         </div>

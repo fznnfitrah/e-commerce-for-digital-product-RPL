@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\PromoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -17,6 +18,7 @@ use App\Models\Produk;
 | Public Routes
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', [HomeController::class, 'index'])->name('dashboard');
 Route::get('/produk-detail/{id}', [HomeController::class, 'detail'])->name('produk.detail');
 
@@ -88,5 +90,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/{id}', [UserController::class, 'update'])->name('update');
     });
 
-    
+
+    // Pengelolaan Promo -> /admin/promo/...
+    Route::prefix('promo')->name('promo.')->group(function () {
+        Route::get('/', [PromoController::class, 'index'])->name('index'); // Menjadi admin.promo.index
+        Route::get('/create', [PromoController::class, 'create'])->name('create'); // Menjadi admin.promo.create
+        Route::post('/', [PromoController::class, 'store'])->name('store'); // Menjadi admin.promo.store
+        Route::get('/{id}/edit', [PromoController::class, 'edit'])->name('edit'); // Menjadi admin.promo.edit
+        Route::put('/{id}', [PromoController::class, 'update'])->name('update'); // Menjadi admin.promo.update
+        Route::delete('/{id}', [PromoController::class, 'destroy'])->name('destroy'); // Menjadi admin.promo.destroy
+    });
 });

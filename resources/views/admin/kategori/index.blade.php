@@ -29,7 +29,7 @@
         </form>
 
         @error('nama_kategori')
-            <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
         @enderror
     </div>
 
@@ -72,13 +72,10 @@
                         {{ $k->produks_count ?? 0 }} produk
                     </span>
 
-                    <form action="{{ route('admin.kategori.destroy', $k->id_kategori) }}" method="POST"
-                          onsubmit="return confirm('Yakin hapus kategori ini?')">
+                    <form action="{{ route('admin.kategori.destroy', $k->id_kategori) }}" method="POST">
                         @csrf
                         @method('DELETE')
-
-                        <button type="submit"
-                            class="text-red-400 text-xs hover:text-red-300 transition">
+                        <button type="button" class="btn-delete text-red-400 text-xs hover:text-red-300 transition">
                             Hapus
                         </button>
                     </form>

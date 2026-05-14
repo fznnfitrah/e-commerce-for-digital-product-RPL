@@ -67,10 +67,10 @@
                         ✏️
                     </a>
 
-                    <form action="{{ route('admin.produk.destroy', $p->id_produk) }}" method="POST" onsubmit="return confirm('Hapus produk ini?')">
+                    <form action="{{ route('admin.produk.destroy', $p->id_produk) }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition" title="Hapus">
+                        <button type="button" class="btn-delete p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition" title="Hapus">
                             🗑️
                         </button>
                     </form>

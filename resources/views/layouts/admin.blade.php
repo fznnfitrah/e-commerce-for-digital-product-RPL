@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard') - J-Store</title>
     @vite('resources/css/app.css')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-[#0a0a0a] text-white overflow-hidden">
@@ -39,7 +40,8 @@
                     <span>📂</span> Kategori
                 </a>
 
-                <a href="#" class="flex items-center gap-3 p-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition">
+                <a href="{{ route('admin.promo.index') }}"
+                    class="flex items-center gap-3 p-3 {{ request()->routeIs('admin.promo.*') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }}zz rounded-xl transition">
                     <span>🎟️</span> Promo & Voucher
                 </a>
 
@@ -59,7 +61,7 @@
         </aside>
 
         {{-- MAIN CONTENT --}}
-        <main class="h-screen flex-1 p-10 overflow-y-auto relative"> 
+        <main class="h-screen flex-1 p-10 overflow-y-auto relative">
             <div class="absolute inset-0 opacity-40 pointer-events-none">
                 <img src="{{ asset('images/bg2.jpg') }}" class="w-full h-full object-cover">
             </div>
@@ -83,5 +85,31 @@
         </main>
     </div>
 </body>
+<script>
+    // Gunakan event delegation agar lebih aman untuk elemen yang mungkin dimuat dinamis
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.btn-delete')) {
+            const button = e.target.closest('.btn-delete');
+            const form = button.closest('form');
 
+            Swal.fire({
+                title: 'Hapus Data?',
+                text: "Tindakan ini akan menghapus data dari galaksi J-Store selamanya!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#7c3aed', // Purple Theme
+                cancelButtonColor: '#374151',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                background: '#111827',
+                color: '#ffffff',
+                backdrop: `rgba(0,0,123,0.4)` // Efek overlay galaxy
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    });
+</script>
 </html>
