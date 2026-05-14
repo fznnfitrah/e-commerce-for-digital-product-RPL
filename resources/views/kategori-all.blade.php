@@ -62,7 +62,7 @@
             <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
             
             <label class="block text-sm font-black mb-4 uppercase tracking-widest text-blue-500 italic">
-                <span x-text="tab == 'token' ? 'Masukkan ID Pelanggan / No. Meter' : 'Masukkan Nomor Handphone'"></span>
+                <span x-text="tab == 'token' ? 'JMasukkan ID Pelanggan / No. Meter' : 'Masukkan Nomor Handphone'"></span>
             </label>
             
             <div class="flex flex-col md:flex-row gap-4">
