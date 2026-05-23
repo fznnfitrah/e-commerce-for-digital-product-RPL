@@ -26,36 +26,31 @@ class ProdukController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi Input (Sesuaikan nama field sesuai database jika perlu)
+        // 1. Validasi Input (Tambahkan opsi tipe baru di in:...)
         $request->validate([
             'id_kategori'      => 'required|exists:kategoris,id_kategori',
             'nama_produk'      => 'required|string|max:255',
             'deskripsi_produk' => 'required|string',
             'harga_produk'     => 'required|numeric',
-            'type'             => 'required|string',
+            'type'             => 'required|string|in:topup,ebook,akun,pulsa,token',
             'gambar'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-
-            // Perbaikan di sini: Tambahkan 'nullable'
             'file_ebook'       => 'required_if:type,ebook|nullable|file|max:10000',
             'data_akun'        => 'required_if:type,akun|nullable|string',
         ]);
+
         // 2. Upload Gambar Produk
         $pathGambar = $request->file('gambar')
             ? $request->file('gambar')->store('produk-images', 'public')
             : null;
 
-        // 3. Simpan ke Tabel produk (Gunakan nama kolom sesuai gambar database)
+        // 3. Simpan ke Tabel produk
         $produk = Produk::create([
             'id_kategori'      => $request->id_kategori,
             'nama_produk'      => $request->nama_produk,
-            'deskripsi_produk' => $request->deskripsi_produk, // Kolom ke-4
-            'harga_produk'     => $request->harga_produk,     // Kolom ke-5
-            'gambar_produk'    => $pathGambar,                // Kolom ke-6
+            'deskripsi_produk' => $request->deskripsi_produk,
+            'harga_produk'     => $request->harga_produk,
+            'gambar_produk'    => $pathGambar,
         ]);
-
-        if (!$produk) {
-            dd("Gagal menyimpan ke tabel produk");
-        }
 
         // 4. Logika Aset berdasarkan Type
         if ($request->type == 'ebook') {
@@ -77,6 +72,14 @@ class ProdukController extends Controller
                     ]);
                 }
             }
+        } elseif (in_array($request->type, ['pulsa', 'token', 'topup'])) {
+            // Otomatis buat 1 entitas aset sebagai penanda produk elektrik/instan aktif
+            AsetProduk::create([
+                'id_produk' => $produk->id_produk,
+                'nama_aset' => 'Layanan Otomatis ' . ucfirst($request->type),
+                'deskripsi' => 'Produk diisi via sistem/input manual oleh pelanggan.',
+                'is_sold'   => false
+            ]);
         }
 
         return redirect()->route('admin.produk.index')->with('success', 'Produk Berhasil Disimpan!');

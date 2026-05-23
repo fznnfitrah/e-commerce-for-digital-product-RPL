@@ -63,6 +63,8 @@
                         <option value="topup">Top-up</option>
                         <option value="ebook">E-book</option>
                         <option value="akun">Akun</option>
+                        <option value="pulsa">Pulsa Provider</option>
+                        <option value="token">Token Listrik</option>
                     </select>
                 </div>
 
