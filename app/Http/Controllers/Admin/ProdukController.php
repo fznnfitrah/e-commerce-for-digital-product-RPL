@@ -14,7 +14,7 @@ class ProdukController extends Controller
     //
     public function index()
     {
-        $produks = Produk::with('kategori')->withCount('asets')->latest()->get();
+        $produks = Produk::with('brand.kategori')->withCount('asets')->latest()->get();
         return view('admin.produk.index', compact('produks'));
     }
 

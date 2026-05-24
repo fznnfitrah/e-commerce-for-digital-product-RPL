@@ -47,7 +47,7 @@
         <div class="p-5">
             <div class="flex justify-between items-start mb-2">
                 <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-                    {{ $p->kategori->nama_kategori ?? 'Tanpa Kategori' }}
+                    {{ $p->brand->fkategori->nama_kategori ?? 'Tanpa Kategori' }}
                 </p>
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                     {{ $p->asets_count ?? 0 }} Stok

@@ -13,17 +13,23 @@ class Produk extends Model
     protected $primaryKey = 'id_produk';
 
     protected $fillable = [
-        'id_kategori', 
-        'nama_produk', 
-        'deskripsi_produk', 
-        'harga_produk',     
+        'id_kategori',
+        'nama_produk',
+        'deskripsi_produk',
+        'harga_produk',
         'gambar_produk'
     ];
 
     // Relasi balik ke Kategori
-    public function kategori()
+    // public function kategori()
+    // {
+    //     return $this->belongsTo(Kategori::class, 'id_kategori', 'id_kategori');
+    // }
+
+    // Hapus relasi kategori lama, ganti dengan ini:
+    public function brand()
     {
-        return $this->belongsTo(Kategori::class, 'id_kategori', 'id_kategori');
+        return $this->belongsTo(Brand::class, 'id_brand', 'id_brand');
     }
 
     // Relasi ke Aset Produk (Akun/File)
