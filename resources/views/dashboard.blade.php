@@ -76,7 +76,7 @@
         <a href="{{ route('produk.detail', $brand->id_brand) }}" class="group block">
             <div class="rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1c23] to-[#0f1116] border border-blue-500/20 shadow-2xl transition hover:-translate-y-2 hover:border-blue-400/60 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] float">
                 <div class="relative aspect-square flex items-center justify-center p-6 bg-gradient-to-b from-blue-500/10 to-transparent">
-                    <img src="{{ $brand->gambar_brand ? asset('storage/' . $brand->gambar_brand) : asset('images/game-placeholder.png') }}"
+                    <img src="{{ $brand->gambar_brand ? asset('storage/' . $brand->gambar_brand) : asset('images/game/game top-up-' . $loop->iteration . '.png') }}"
                         class="w-full h-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] transition duration-500 group-hover:scale-110">
                 </div>
                 <div class="px-4 py-5 text-center bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border-t border-blue-500/20">
