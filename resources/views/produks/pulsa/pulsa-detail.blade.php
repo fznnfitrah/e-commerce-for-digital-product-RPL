@@ -86,7 +86,7 @@
         {{-- RIGHT SIDE --}}
         <div class="lg:col-span-9">
 
-            <form action="#" method="POST" class="space-y-6">
+            <form action="{{ route('transaksi.checkout') }}" method="POST" class="space-y-6">
                 @csrf
 
                 {{-- STEP 1 --}}

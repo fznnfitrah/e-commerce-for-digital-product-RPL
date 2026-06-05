@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-8 max-w-6xl">
 
-    <form action="#" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <form action="{{ route('transaksi.checkout') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         @csrf
 
         {{-- SIDEBAR PRODUK --}}

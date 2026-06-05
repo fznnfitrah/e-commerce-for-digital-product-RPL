@@ -55,8 +55,21 @@
 
         {{-- RIGHT SIDE --}}
         <div class="lg:col-span-9">
+            @if ($errors->any())
+            <div class="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4">
+                <div class="font-semibold text-red-400 mb-2">
+                    Terjadi kesalahan:
+                </div>
 
-            <form action="#" method="POST" class="space-y-6">
+                <ul class="list-disc list-inside text-sm text-red-300 space-y-1">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            <form action="{{ route('transaksi.checkout') }}" method="POST" class="space-y-6">
                 @csrf
 
                 {{-- STEP 1 --}}
@@ -86,12 +99,7 @@
                                 Email / Catatan Request
                             </label>
 
-                            <input
-                                type="text"
-                                name="id_target"
-                                placeholder="contoh@email.com"
-                                autocomplete="off"
-                                class="w-full bg-black/30 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 outline-none transition">
+                            <input type="text" name="id_target" placeholder="contoh@email.com" autocomplete="off" required class="w-full bg-black/30 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 outline-none transition">
                         </div>
 
                         {{-- PHONE --}}
@@ -100,11 +108,7 @@
                                 Nomor WhatsApp (Opsional)
                             </label>
 
-                            <input
-                                type="text"
-                                name="phone"
-                                placeholder="08xxxxxxxxxx"
-                                autocomplete="off"
+                            <input type="text" name="kontak_pelanggan" placeholder="08xxxxxxxxxx" autocomplete="off"
                                 class="w-full bg-black/30 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 outline-none transition">
                         </div>
 
@@ -113,7 +117,6 @@
 
                 {{-- STEP 2 --}}
                 <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
-
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 rounded-2xl bg-purple-600 flex items-center justify-center font-black text-white">
                             2
@@ -136,16 +139,9 @@
 
                         <label class="cursor-pointer">
 
-                            <input
-                                type="radio"
-                                name="id_produk"
-                                value="{{ $produk->id_produk }}"
-                                class="hidden peer id-produk-radio"
-                                data-name="{{ $produk->nama_produk }}"
-                                data-price="{{ number_format($produk->harga_produk, 0, ',', '.') }}">
+                            <input type="radio" name="id_produk" value="{{ $produk->id_produk }}" class="hidden peer id-produk-radio" data-name="{{ $produk->nama_produk }}" data-price="{{ number_format($produk->harga_produk, 0, ',', '.') }}">
 
                             <div class="border border-white/10 bg-black/20 rounded-2xl p-5 transition hover:border-purple-500/50 peer-checked:border-purple-500 peer-checked:bg-purple-500/10">
-
                                 <div class="flex items-start justify-between gap-4">
 
                                     <div>
@@ -194,9 +190,36 @@
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 
+                        {{-- BCA VIRTUAL ACCOUNT (Baru) --}}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="metode_pembayaran" value="bca_va" class="hidden peer">
+                            <div class="h-20 rounded-2xl border border-white/10 bg-black/20 flex flex-col items-center justify-center text-white font-bold transition hover:border-blue-500 peer-checked:border-blue-500 peer-checked:bg-blue-500/10">
+                                <span class="text-sm">BCA</span>
+                                <span class="text-[10px] text-gray-400 font-normal">Virtual Account</span>
+                            </div>
+                        </label>
+
+                        {{-- MANDIRI VIRTUAL ACCOUNT (Baru) --}}
+                        <label class="cursor-pointer">
+                            {{-- Catatan: Midtrans menggunakan kode 'echannel' khusus untuk Mandiri Bill/VA --}}
+                            <input type="radio" name="metode_pembayaran" value="echannel" class="hidden peer">
+                            <div class="h-20 rounded-2xl border border-white/10 bg-black/20 flex flex-col items-center justify-center text-white font-bold transition hover:border-yellow-400 peer-checked:border-yellow-400 peer-checked:bg-yellow-400/10">
+                                <span class="text-sm">Mandiri</span>
+                                <span class="text-[10px] text-gray-400 font-normal">Virtual Account</span>
+                            </div>
+                        </label>
+
+                        {{-- SHOPEEPAY (Baru) --}}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="metode_pembayaran" value="shopeepay" class="hidden peer">
+                            <div class="h-20 rounded-2xl border border-white/10 bg-black/20 flex items-center justify-center text-white font-bold transition hover:border-orange-500 peer-checked:border-orange-500 peer-checked:bg-orange-500/10">
+                                ShopeePay
+                            </div>
+                        </label>
+
                         {{-- GOPAY --}}
                         <label class="cursor-pointer">
-                            <input type="radio" name="payment" value="gopay" class="hidden peer">
+                            <input type="radio" name="metode_pembayaran" value="gopay" class="hidden peer">
 
                             <div class="h-20 rounded-2xl border border-white/10 bg-black/20 flex items-center justify-center text-white font-bold transition hover:border-blue-500 peer-checked:border-blue-500 peer-checked:bg-blue-500/10">
                                 GoPay
@@ -205,28 +228,10 @@
 
                         {{-- DANA --}}
                         <label class="cursor-pointer">
-                            <input type="radio" name="payment" value="dana" class="hidden peer">
+                            <input type="radio" name="metode_pembayaran" value="dana" class="hidden peer">
 
                             <div class="h-20 rounded-2xl border border-white/10 bg-black/20 flex items-center justify-center text-white font-bold transition hover:border-cyan-500 peer-checked:border-cyan-500 peer-checked:bg-cyan-500/10">
                                 DANA
-                            </div>
-                        </label>
-
-                        {{-- QRIS --}}
-                        <label class="cursor-pointer">
-                            <input type="radio" name="payment" value="qris" class="hidden peer">
-
-                            <div class="h-20 rounded-2xl border border-white/10 bg-black/20 flex items-center justify-center text-white font-bold transition hover:border-yellow-500 peer-checked:border-yellow-500 peer-checked:bg-yellow-500/10">
-                                QRIS
-                            </div>
-                        </label>
-
-                        {{-- OVO --}}
-                        <label class="cursor-pointer">
-                            <input type="radio" name="payment" value="ovo" class="hidden peer">
-
-                            <div class="h-20 rounded-2xl border border-white/10 bg-black/20 flex items-center justify-center text-white font-bold transition hover:border-purple-500 peer-checked:border-purple-500 peer-checked:bg-purple-500/10">
-                                OVO
                             </div>
                         </label>
 
@@ -268,14 +273,8 @@
 
                         </div>
 
-                        <button
-                            type="submit"
-                            id="submit_button"
-                            disabled
-                            class="px-10 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black uppercase tracking-wide shadow-xl shadow-purple-500/20 transition active:scale-95">
-
+                        <button type="submit" id="submit_button" disabled class="px-10 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black uppercase tracking-wide shadow-xl shadow-purple-500/20 transition active:scale-95">
                             Beli Sekarang
-
                         </button>
 
                     </div>

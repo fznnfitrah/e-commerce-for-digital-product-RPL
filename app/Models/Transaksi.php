@@ -24,6 +24,7 @@ class Transaksi extends Model
         'total_akhir',
         'metode_pembayaran',
         'status_pembayaran',
+        'snap_token',
         'sn_token_result'
     ];
 
