@@ -108,9 +108,14 @@
 
                     <td class="p-6">
                         <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest
-                                    {{ $order->status_pembayaran == 'success'
-                                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                                        : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' }}">
+                            @if($order->status_pembayaran == 'success') 
+                                bg-green-500/10 text-green-400 border border-green-500/20
+                            @elseif($order->status_pembayaran == 'pending') 
+                                bg-yellow-500/10 text-yellow-400 border border-yellow-500/20
+                            @else 
+                                bg-red-500/10 text-red-400 border border-red-500/20
+                            @endif
+                                ">
                             {{ $order->status_pembayaran }}
                         </span>
                     </td>

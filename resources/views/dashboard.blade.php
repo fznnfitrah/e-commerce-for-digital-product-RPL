@@ -76,7 +76,7 @@
         <a href="{{ route('produk.detail', $brand->id_brand) }}" class="group block">
             <div class="rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1c23] to-[#0f1116] border border-blue-500/20 shadow-2xl transition hover:-translate-y-2 hover:border-blue-400/60 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] float">
                 <div class="relative aspect-square flex items-center justify-center p-6 bg-gradient-to-b from-blue-500/10 to-transparent">
-                    <img src="{{ $brand->gambar_brand ? asset('storage/' . $brand->gambar_brand) : asset('images/game-placeholder.png') }}"
+                    <img src="{{ $brand->gambar_brand ? asset('storage/' . $brand->gambar_brand) : asset('images/game/game top-up-' . $loop->iteration . '.png') }}"
                         class="w-full h-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] transition duration-500 group-hover:scale-110">
                 </div>
                 <div class="px-4 py-5 text-center bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border-t border-blue-500/20">
@@ -196,12 +196,12 @@
         <h3 class="text-2xl font-black italic uppercase text-white galaxy-title flex items-center gap-3">
             <span class="w-2 h-8 bg-gradient-to-b from-yellow-500 to-orange-600 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.5)]"></span> ⚡ Pulsa & Token Listrik
         </h3>
-        <a href="{{ route('kategori.all', 'Utilitas') }}" class="group text-sm font-bold text-yellow-500 hover:text-yellow-300 flex items-center gap-2 transition">
+        <!-- <a href="{{ route('kategori.all', 'Utilitas') }}" class="group text-sm font-bold text-yellow-500 hover:text-yellow-300 flex items-center gap-2 transition">
             LIHAT SEMUA
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-        </a>
+        </a> -->
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-12">

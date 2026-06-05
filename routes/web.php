@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\TransaksiController;
 use App\Models\Produk;
 
 /*
@@ -26,6 +27,13 @@ Route::get('/kategori/{nama}', function ($nama) {
     return view('kategori-all', ['kategori' => $nama]);
 })->name('kategori.all');
 
+// Route untuk memproses form order dari halaman detail produk
+Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout'])->name('transaksi.checkout');
+
+// Route untuk menampilkan halaman invoice beserta pop-up Midtrans
+Route::get('/transaksi/pembayaran/{id_transaksi}', [TransaksiController::class, 'pembayaran'])->name('transaksi.pembayaran');
+
+// Route::post('/midtrans/callback', [TransaksiController::class, 'callback']);
 /*
 |--------------------------------------------------------------------------
 | Authentication Routes 
@@ -51,7 +59,6 @@ Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkReques
 // Proses pengiriman link reset password ke email
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
     ->name('password.email');
-
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
