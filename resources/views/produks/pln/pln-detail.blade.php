@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-8 max-w-6xl">
 
-    <form action="{{ route('transaksi.checkout') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <form action="{{ route('transaksi.checkout') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-12 gap-6" id="form-pln">
         @csrf
 
         {{-- SIDEBAR PRODUK --}}
@@ -61,7 +61,7 @@
         {{-- FORM --}}
         <div class="lg:col-span-8 space-y-6">
 
-            {{-- STEP 1 --}}
+            {{-- STEP 1: INFORMASI PELANGGAN --}}
             <div class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 rounded-2xl bg-yellow-500 text-black flex items-center justify-center font-black text-sm">
@@ -70,44 +70,71 @@
 
                     <div>
                         <h3 class="text-lg font-black text-white uppercase">
-                            Masukkan ID Pelanggan
+                            Informasi Pelanggan
                         </h3>
                         <p class="text-xs text-gray-400">
-                            Nomor meter / ID pelanggan PLN
+                            Masukkan ID Meter dan Kontak Anda
                         </p>
                     </div>
                 </div>
 
-                <div>
-                    <label class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-3">
-                        Nomor Meter / ID Pelanggan
-                    </label>
+                <div class="space-y-6">
+                    {{-- ID TARGET (ID PELANGGAN) --}}
+                    <div>
+                        <label class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-3">
+                            Nomor Meter / ID Pelanggan
+                        </label>
 
-                    <div class="relative">
-                        <input
-                            type="number"
-                            id="id_pelanggan"
-                            name="id_target"
-                            placeholder="Contoh: 14123456789"
-                            required
-                            autocomplete="off"
-                            class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-lg font-bold tracking-wide focus:ring-2 focus:ring-yellow-500 outline-none transition">
+                        <div class="relative">
+                            <input
+                                type="number"
+                                id="id_pelanggan"
+                                name="id_target"
+                                value="{{ old('id_target') }}"
+                                placeholder="Contoh: 14123456789"
+                                required
+                                autocomplete="off"
+                                class="w-full bg-black/40 border @error('id_target') border-red-500 @else border-white/10 @enderror rounded-2xl px-5 py-4 text-white text-lg font-bold tracking-wide focus:ring-2 focus:ring-yellow-500 outline-none transition">
 
-                        <div id="status_badge"
-                            class="hidden absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-black uppercase">
-                            ✓ Valid
+                            <div id="status_badge"
+                                class="hidden absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-black uppercase">
+                                ✓ Valid
+                            </div>
                         </div>
+
+                        @error('id_target')
+                            <p class="text-red-500 text-sm mt-2 font-semibold">{{ $message }}</p>
+                        @enderror
+
+                        <p class="text-xs text-gray-500 mt-2">
+                            Minimal 11 digit dan maksimal 12 digit.
+                        </p>
                     </div>
 
-                    <p class="text-xs text-gray-500 mt-3">
-                        Minimal 11 digit dan maksimal 12 digit.
-                    </p>
+                    {{-- KONTAK PELANGGAN (UNTUK PENGIRIMAN TOKEN/VA) --}}
+                    <div>
+                        <label class="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-3">
+                            WhatsApp / Email (Pengiriman Token & VA)
+                        </label>
+                        <input
+                            type="text"
+                            name="kontak_pelanggan"
+                            value="{{ old('kontak_pelanggan') }}"
+                            placeholder="Contoh: 081234567890 atau email@anda.com"
+                            required
+                            autocomplete="off"
+                            class="w-full bg-black/40 border @error('kontak_pelanggan') border-red-500 @else border-white/10 @enderror rounded-2xl px-5 py-4 text-white text-lg font-bold tracking-wide focus:ring-2 focus:ring-yellow-500 outline-none transition">
+                        
+                        @error('kontak_pelanggan')
+                            <p class="text-red-500 text-sm mt-2 font-semibold">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 
-            {{-- STEP 2 --}}
+            {{-- STEP 2: PRODUK --}}
             <div id="nominal_section"
-                class="hidden bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl animate-fade-in">
+                class="{{ old('id_target') ? '' : 'hidden' }} bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl animate-fade-in">
 
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 rounded-2xl bg-yellow-500 text-black flex items-center justify-center font-black text-sm">
@@ -125,6 +152,12 @@
                     </div>
                 </div>
 
+                @error('id_produk')
+                    <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500 text-red-500 text-sm font-semibold">
+                        Pilih produk nominal terlebih dahulu.
+                    </div>
+                @enderror
+
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                     @foreach($items as $produk)
                     <label class="group cursor-pointer">
@@ -134,6 +167,7 @@
                             name="id_produk"
                             value="{{ $produk->id_produk }}"
                             class="peer hidden"
+                            {{ old('id_produk') == $produk->id_produk ? 'checked' : '' }}
                             required>
 
                         <div class="h-full rounded-2xl border border-white/10 bg-black/20 p-5 transition-all duration-300
@@ -157,7 +191,7 @@
                             </div>
 
                             <div class="mt-6">
-                                <span class="text-yellow-400 text-lg font-black">
+                                <span class="text-yellow-400 text-lg font-black price-text">
                                     Rp {{ number_format($produk->harga_produk, 0, ',', '.') }}
                                 </span>
                             </div>
@@ -167,9 +201,9 @@
                 </div>
             </div>
 
-            {{-- STEP 3 --}}
+            {{-- STEP 3: METODE PEMBAYARAN --}}
             <div id="payment_section"
-                class="hidden bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl animate-fade-in">
+                class="{{ old('id_produk') ? '' : 'hidden' }} bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl animate-fade-in">
 
                 <div class="flex items-center gap-3 mb-6">
                     <div class="w-10 h-10 rounded-2xl bg-yellow-500 text-black flex items-center justify-center font-black text-sm">
@@ -182,58 +216,76 @@
                         </h3>
 
                         <p class="text-xs text-gray-400">
-                            Gunakan e-wallet atau transfer bank
+                            Gunakan E-Wallet atau Transfer Bank (VA)
                         </p>
                     </div>
                 </div>
 
+                @error('metode_pembayaran')
+                    <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500 text-red-500 text-sm font-semibold">
+                        Pilih metode pembayaran terlebih dahulu.
+                    </div>
+                @enderror
+
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 
+                    {{-- DANA --}}
                     <label class="cursor-pointer">
-                        <input type="radio" name="payment_method" value="dana" class="peer hidden">
-
-                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex items-center justify-center
-                                    hover:border-blue-500 transition peer-checked:border-blue-500 peer-checked:bg-blue-500/10">
-
-                            <span class="text-blue-400 font-black text-lg uppercase">
-                                DANA
-                            </span>
+                        <input type="radio" name="metode_pembayaran" value="dana" class="peer hidden" {{ old('metode_pembayaran') == 'dana' ? 'checked' : '' }} required>
+                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex items-center justify-center hover:border-cyan-500 transition peer-checked:border-cyan-500 peer-checked:bg-cyan-500/10">
+                            <span class="text-white font-black text-lg uppercase">DANA</span>
                         </div>
                     </label>
 
+                    {{-- GOPAY --}}
                     <label class="cursor-pointer">
-                        <input type="radio" name="payment_method" value="gopay" class="peer hidden">
-
-                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex items-center justify-center
-                                    hover:border-green-500 transition peer-checked:border-green-500 peer-checked:bg-green-500/10">
-
-                            <span class="text-green-400 font-black text-lg uppercase">
-                                GOPAY
-                            </span>
+                        <input type="radio" name="metode_pembayaran" value="gopay" class="peer hidden" {{ old('metode_pembayaran') == 'gopay' ? 'checked' : '' }}>
+                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex items-center justify-center hover:border-green-500 transition peer-checked:border-green-500 peer-checked:bg-green-500/10">
+                            <span class="text-white font-black text-lg uppercase">GOPAY</span>
                         </div>
                     </label>
 
+                    {{-- OVO --}}
                     <label class="cursor-pointer">
-                        <input type="radio" name="payment_method" value="ovo" class="peer hidden">
-
-                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex items-center justify-center
-                                    hover:border-purple-500 transition peer-checked:border-purple-500 peer-checked:bg-purple-500/10">
-
-                            <span class="text-purple-400 font-black text-lg uppercase">
-                                OVO
-                            </span>
+                        <input type="radio" name="metode_pembayaran" value="ovo" class="peer hidden" {{ old('metode_pembayaran') == 'ovo' ? 'checked' : '' }}>
+                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex items-center justify-center hover:border-purple-500 transition peer-checked:border-purple-500 peer-checked:bg-purple-500/10">
+                            <span class="text-white font-black text-lg uppercase">OVO</span>
                         </div>
                     </label>
 
+                    {{-- BCA VA --}}
                     <label class="cursor-pointer">
-                        <input type="radio" name="payment_method" value="qris" class="peer hidden">
+                        <input type="radio" name="metode_pembayaran" value="bca_va" class="peer hidden" {{ old('metode_pembayaran') == 'bca_va' ? 'checked' : '' }}>
+                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex flex-col items-center justify-center hover:border-blue-600 transition peer-checked:border-blue-600 peer-checked:bg-blue-600/10">
+                            <span class="text-white font-black text-lg uppercase">BCA</span>
+                            <span class="text-xs text-gray-400">Virtual Account</span>
+                        </div>
+                    </label>
 
-                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex items-center justify-center
-                                    hover:border-yellow-500 transition peer-checked:border-yellow-500 peer-checked:bg-yellow-500/10">
+                    {{-- MANDIRI E-CHANNEL --}}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="metode_pembayaran" value="echannel" class="peer hidden" {{ old('metode_pembayaran') == 'echannel' ? 'checked' : '' }}>
+                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex flex-col items-center justify-center hover:border-yellow-500 transition peer-checked:border-yellow-500 peer-checked:bg-yellow-500/10">
+                            <span class="text-white font-black text-lg uppercase">MANDIRI</span>
+                            <span class="text-xs text-gray-400">Virtual Account</span>
+                        </div>
+                    </label>
 
-                            <span class="text-yellow-400 font-black text-lg uppercase">
-                                QRIS
-                            </span>
+                    {{-- BNI VA --}}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="metode_pembayaran" value="bni_va" class="peer hidden" {{ old('metode_pembayaran') == 'bni_va' ? 'checked' : '' }}>
+                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex flex-col items-center justify-center hover:border-orange-500 transition peer-checked:border-orange-500 peer-checked:bg-orange-500/10">
+                            <span class="text-white font-black text-lg uppercase">BNI</span>
+                            <span class="text-xs text-gray-400">Virtual Account</span>
+                        </div>
+                    </label>
+
+                    {{-- BRI VA --}}
+                    <label class="cursor-pointer">
+                        <input type="radio" name="metode_pembayaran" value="bri_va" class="peer hidden" {{ old('metode_pembayaran') == 'bri_va' ? 'checked' : '' }}>
+                        <div class="h-20 rounded-2xl border border-white/10 bg-black/30 flex flex-col items-center justify-center hover:border-blue-400 transition peer-checked:border-blue-400 peer-checked:bg-blue-400/10">
+                            <span class="text-white font-black text-lg uppercase">BRI</span>
+                            <span class="text-xs text-gray-400">Virtual Account</span>
                         </div>
                     </label>
 
@@ -242,7 +294,7 @@
 
             {{-- DETAIL --}}
             <div id="submit_section"
-                class="hidden bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-3xl p-6 backdrop-blur-xl animate-fade-in">
+                class="{{ old('id_produk') ? '' : 'hidden' }} bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-3xl p-6 backdrop-blur-xl animate-fade-in">
 
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 
@@ -287,39 +339,53 @@
         const radios = document.querySelectorAll('input[name="id_produk"]');
         const pricePreview = document.getElementById('price_preview');
 
-        // VALIDASI ID PELANGGAN
-        idInput.addEventListener('input', function() {
-
-            const value = this.value.trim();
-
+        // Fungsi Cek Validasi ID
+        function checkIdLength(value) {
             if (value.length >= 11 && value.length <= 12) {
-
                 statusBadge.classList.remove('hidden');
                 nominalSection.classList.remove('hidden');
-
             } else {
-
                 statusBadge.classList.add('hidden');
                 nominalSection.classList.add('hidden');
-                paymentSection.classList.add('hidden');
-                submitSection.classList.add('hidden');
+                // Sembunyikan bawahnya jika belum ada produk terpilih (handling untuk reset)
+                if(!document.querySelector('input[name="id_produk"]:checked')) {
+                    paymentSection.classList.add('hidden');
+                    submitSection.classList.add('hidden');
+                }
             }
+        }
+
+        // Trigger saat diketik
+        idInput.addEventListener('input', function() {
+            checkIdLength(this.value.trim());
         });
+
+        // Trigger on load (untuk mempertahankan state saat kembali dari error form)
+        if(idInput.value.trim().length > 0) {
+            checkIdLength(idInput.value.trim());
+        }
 
         // PILIH PRODUK
         radios.forEach(radio => {
-
             radio.addEventListener('change', function() {
-
-                const parent = this.closest('label');
-                const priceText = parent.querySelector('.text-yellow-400').textContent;
-
-                paymentSection.classList.remove('hidden');
-                submitSection.classList.remove('hidden');
-
-                pricePreview.textContent = priceText;
+                updatePricePreview(this);
             });
+            
+            // Auto trigger jika radio button sudah terpilih (karena fungsi old())
+            if(radio.checked) {
+                updatePricePreview(radio);
+            }
         });
+
+        function updatePricePreview(element) {
+            const parent = element.closest('label');
+            const priceText = parent.querySelector('.price-text').textContent;
+
+            paymentSection.classList.remove('hidden');
+            submitSection.classList.remove('hidden');
+
+            pricePreview.textContent = priceText;
+        }
 
     });
 </script>

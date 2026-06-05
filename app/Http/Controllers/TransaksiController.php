@@ -85,7 +85,7 @@ class TransaksiController extends Controller
                 'enabled_payments' => [$transaksi->metode_pembayaran],
             ];
 
-            \Midtrans\Config::$overrideNotifUrl = 'https://ziwic-103-168-186-150.run.pinggy-free.link/api/midtrans/callback';
+            \Midtrans\Config::$overrideNotifUrl = 'https://bllvv-103-168-186-150.run.pinggy-free.link/api/midtrans/callback';
 
             try {
                 $snapToken = Snap::getSnapToken($params);
