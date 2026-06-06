@@ -63,7 +63,7 @@
             </h3>
             <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Update aktivitas terbaru hari ini</p>
         </div>
-        <a href="#" class="px-5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold transition-all">
+        <a href="{{ route('admin.transaksi.riwayat') }}" class="px-5 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold transition-all">
             LIHAT SEMUA
         </a>
     </div>
@@ -84,6 +84,7 @@
             <tbody class="divide-y divide-white/5">
                 @forelse($recent_orders as $order)
                 <tr class="hover:bg-white/[0.03] transition-all group">
+
 
                     <td class="p-6">
                         <p class="font-bold text-white group-hover:text-blue-400 transition-colors">

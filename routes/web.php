@@ -33,7 +33,7 @@ Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout'])->na
 // Route untuk menampilkan halaman invoice beserta pop-up Midtrans
 Route::get('/transaksi/pembayaran/{id_transaksi}', [TransaksiController::class, 'pembayaran'])->name('transaksi.pembayaran');
 
-// Route::post('/midtrans/callback', [TransaksiController::class, 'callback']);
+
 /*
 |--------------------------------------------------------------------------
 | Authentication Routes 
@@ -59,6 +59,7 @@ Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkReques
 // Proses pengiriman link reset password ke email
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
     ->name('password.email');
+
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
@@ -69,6 +70,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Dashboard Admin -> /admin
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
+
+    Route::prefix('transaksi')->name('transaksi.')->group(function () {
+        Route::get('/riwayat', [AdminController::class, 'riwayat'])->name('riwayat');
+    });
 
     // Pengelolaan Produk -> /admin/produk/...
     Route::prefix('produk')->name('produk.')->group(function () {

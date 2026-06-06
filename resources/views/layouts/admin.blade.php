@@ -45,7 +45,7 @@
                     <span>🎟️</span> Promo & Voucher
                 </a>
 
-                <a href="#" class="flex items-center gap-3 p-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition">
+                <a href="{{ route('admin.transaksi.riwayat') }}" class="fflex items-center gap-3 p-3 {{ request()->routeIs('admin.transaksi.riwayat') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }} rounded-xl transition">
                     <span>🧾</span> Riwayat Transaksi
                 </a>
             </nav>
@@ -87,7 +87,7 @@
 </body>
 <script>
     // Gunakan event delegation agar lebih aman untuk elemen yang mungkin dimuat dinamis
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
         if (e.target.closest('.btn-delete')) {
             const button = e.target.closest('.btn-delete');
             const form = button.closest('form');
@@ -112,4 +112,5 @@
         }
     });
 </script>
+
 </html>

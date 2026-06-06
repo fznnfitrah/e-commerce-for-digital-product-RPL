@@ -30,4 +30,19 @@ class AdminController extends Controller
 
         return view('admin.dashboard', $data);
     }
+
+    public function riwayat()
+    {
+        // 1. Wajib jalankan Lazy Checking Expiry sebelum render halaman riwayat
+        Transaksi::where('status_pembayaran', 'pending')
+            ->where('created_at', '<', Carbon::now()->subMinutes(15))
+            ->update(['status_pembayaran' => 'failed']);
+
+        // 2. Ambil semua data transaksi dengan pagination (misal: 10 data per halaman)
+        $all_transaksi = Transaksi::with('produk')
+            ->latest()
+            ->paginate(10);
+
+        return view('admin.riwayat_transaksi', compact('all_transaksi'));
+    }
 }
