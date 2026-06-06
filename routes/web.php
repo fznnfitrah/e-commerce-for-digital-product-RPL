@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PromoController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -111,5 +112,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/edit', [PromoController::class, 'edit'])->name('edit'); // Menjadi admin.promo.edit
         Route::put('/{id}', [PromoController::class, 'update'])->name('update'); // Menjadi admin.promo.update
         Route::delete('/{id}', [PromoController::class, 'destroy'])->name('destroy'); // Menjadi admin.promo.destroy
+    });
+
+    // Pengelolaan Brand -> /admin/brand/...
+    Route::prefix('brand')->name('brand.')->group(function () {
+        Route::get('/', [BrandController::class, 'index'])->name('index');
+        Route::get('/create', [BrandController::class, 'create'])->name('create');
+        Route::post('/', [BrandController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [BrandController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [BrandController::class, 'update'])->name('update');
+        Route::delete('/{id}', [BrandController::class, 'destroy'])->name('destroy');
     });
 });

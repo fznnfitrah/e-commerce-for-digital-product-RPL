@@ -35,6 +35,11 @@
                     <span>📦</span> Produk
                 </a>
 
+                <a href="{{ route('admin.brand.index') }}"
+                    class="flex items-center gap-3 p-3 {{ request()->routeIs('admin.brand.*') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }} rounded-xl transition">
+                    <span>🏷️</span> Brand
+                </a>
+
                 <a href="{{ route('admin.kategori.index') }}"
                     class="flex items-center gap-3 p-3 {{ request()->routeIs('admin.kategori.*') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }} rounded-xl transition">
                     <span>📂</span> Kategori
@@ -45,7 +50,7 @@
                     <span>🎟️</span> Promo & Voucher
                 </a>
 
-                <a href="{{ route('admin.transaksi.riwayat') }}" class="fflex items-center gap-3 p-3 {{ request()->routeIs('admin.transaksi.riwayat') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }} rounded-xl transition">
+                <a href="{{ route('admin.transaksi.riwayat') }}" class="flex items-center gap-3 p-3 {{ request()->routeIs('admin.transaksi.riwayat') ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white' }} rounded-xl transition">
                     <span>🧾</span> Riwayat Transaksi
                 </a>
             </nav>
