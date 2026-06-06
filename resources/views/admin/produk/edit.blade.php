@@ -10,6 +10,12 @@
         @csrf
         @method('PUT')
 
+        {{-- LOGIKA UNTUK MENDAPATKAN KATEGORI DARI BRAND SAAT INI --}}
+        @php
+        $currentBrand = $brands->firstWhere('id_brand', $produk->id_brand);
+        $currentKategoriId = $currentBrand ? $currentBrand->id_kategori : '';
+        @endphp
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
             {{-- SEKSI KIRI: INFORMASI UTAMA --}}
@@ -31,27 +37,45 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
+                    {{-- DROPDOWN KATEGORI (Hanya untuk filter visual) --}}
                     <div>
                         <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Kategori</label>
-                        <select name="id_kategori" required
+                        <select id="select_kategori" required onchange="handleKategoriChange()"
                             class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                            @foreach($kategoris as $k)
-                            <option value="{{ $k->id_kategori }}" {{ $produk->id_kategori == $k->id_kategori ? 'selected' : '' }}>
-                                {{ $k->nama_kategori }}
+                            <option value="">Pilih Kategori</option>
+                            @foreach($brands->pluck('kategori')->unique('id_kategori') as $kat)
+                            @if($kat)
+                            <option value="{{ $kat->id_kategori }}" {{ (old('id_kategori', $currentKategoriId) == $kat->id_kategori) ? 'selected' : '' }}>
+                                {{ $kat->nama_kategori }}
+                            </option>
+                            @endif
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- DROPDOWN BRAND (Yang disimpan ke Database) --}}
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Sub-Brand</label>
+                        <select name="id_brand" id="select_brand" required
+                            class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                            <option value="">Pilih Sub-Brand</option>
+                            @foreach($brands as $b)
+                            <option value="{{ $b->id_brand }}" data-kategori="{{ $b->id_kategori }}" {{ (old('id_brand', $produk->id_brand) == $b->id_brand) ? 'selected' : '' }}>
+                                {{ $b->nama_brand }}
                             </option>
                             @endforeach
                         </select>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Harga Produk (Rp)</label>
-                        <input type="number" name="harga_produk" value="{{ old('harga_produk', $produk->harga_produk) }}" required
-                            class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Harga Produk (Rp)</label>
+                    <input type="number" name="harga_produk" value="{{ old('harga_produk', $produk->harga_produk) }}" required
+                        class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                 </div>
             </div>
 
             {{-- SEKSI KANAN: MEDIA --}}
-
             <div class="space-y-6 bg-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-md">
                 @if ($errors->any())
                 <div class="max-w-4xl mx-auto mb-6 bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-2xl text-sm">
@@ -85,11 +109,11 @@
                     </div>
                 </div>
 
-                {{-- INFO TYPE (Read Only di Edit untuk Keamanan Relasi Aset) --}}
+                {{-- INFO TYPE --}}
                 <div class="mt-10 p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
                     <p class="text-[10px] text-yellow-500 font-bold uppercase mb-1">Tipe Produk</p>
                     <p class="text-sm font-bold text-white uppercase tracking-widest">
-                        {{ $produk->type ?? 'Digital Item' }}
+                        {{ $produk->type ?? 'Layanan Instan' }}
                     </p>
                     <p class="text-[10px] text-gray-500 mt-2 italic">
                         *Tipe produk tidak dapat diubah setelah dibuat untuk menjaga integritas data aset.
@@ -113,12 +137,47 @@
 </div>
 
 <script>
-    // Live Preview Gambar saat dipilih
+    // Live Preview Gambar
     document.getElementById('input-gambar').onchange = function(evt) {
         const [file] = this.files;
         if (file) {
             document.getElementById('img-preview').src = URL.createObjectURL(file);
         }
     };
+
+    // LOGIKA FILTER BRANDS BERDASARKAN KATEGORI
+    let masterBrandOptions = [];
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectBrand = document.getElementById('select_brand');
+        masterBrandOptions = Array.from(selectBrand.options);
+
+        // Simpan nilai brand awal (yang dari database)
+        const initialBrandValue = selectBrand.value;
+
+        // Panggil filter untuk membersihkan list berdasarkan kategori saat ini
+        handleKategoriChange();
+
+        // Kembalikan pilihan brand ke kondisi awal
+        selectBrand.value = initialBrandValue;
+    });
+
+    function handleKategoriChange() {
+        const idKategoriTerpilih = document.getElementById('select_kategori').value;
+        const selectBrand = document.getElementById('select_brand');
+
+        // Reset Dropdown
+        selectBrand.innerHTML = '';
+        selectBrand.appendChild(masterBrandOptions[0]); // Opsi default
+
+        masterBrandOptions.forEach(function(option) {
+            const kategoriAset = option.getAttribute('data-kategori');
+
+            if (idKategoriTerpilih === "" || kategoriAset === idKategoriTerpilih) {
+                if (option.value !== "") {
+                    selectBrand.appendChild(option);
+                }
+            }
+        });
+    }
 </script>
 @endsection

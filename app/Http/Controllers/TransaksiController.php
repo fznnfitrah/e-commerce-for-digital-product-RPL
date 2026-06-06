@@ -7,6 +7,7 @@ use App\Models\Produk;
 use Illuminate\Http\Request;
 use Midtrans\Config;
 use Midtrans\Snap;
+use App\Jobs\ProsesPengirimanProduk;
 
 class TransaksiController extends Controller
 {
@@ -85,7 +86,7 @@ class TransaksiController extends Controller
                 'enabled_payments' => [$transaksi->metode_pembayaran],
             ];
 
-            \Midtrans\Config::$overrideNotifUrl = 'https://jrbne-103-168-186-150.run.pinggy-free.link//api/midtrans/callback';
+            \Midtrans\Config::$overrideNotifUrl = 'https://frequency-deferral-deviant.ngrok-free.dev/api/midtrans/callback';
 
             try {
                 $snapToken = Snap::getSnapToken($params);
@@ -119,7 +120,13 @@ class TransaksiController extends Controller
             if ($transaksi) {
                 // 4. Update status berdasarkan laporan Midtrans
                 if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
-                    $transaksi->status_pembayaran = 'success';
+                    if ($transaksi->status_pembayaran !== 'success') {
+                        $transaksi->status_pembayaran = 'success';
+                        $transaksi->save();
+
+                        // === DISPATCH BACKGROUND JOB PENGIRIMAN PRODUK ===
+                        ProsesPengirimanProduk::dispatch($transaksi);
+                    }
                 } elseif ($request->transaction_status == 'expire' || $request->transaction_status == 'cancel' || $request->transaction_status == 'deny') {
                     $transaksi->status_pembayaran = 'failed';
                 }

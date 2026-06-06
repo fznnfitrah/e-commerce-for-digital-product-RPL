@@ -34,27 +34,30 @@
             </div>
             @endif
 
-            {{-- Badge Status --}}
+            {{-- Badge Status (Diperbaiki: Menggunakan perhitungan aset) --}}
             <div class="absolute top-4 right-4">
                 <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest 
-                    {{ $p->status == 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400' }}">
-                    {{ $p->status }}
+                    {{ $p->asets_count > 0 ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400' }}">
+                    {{ $p->asets_count > 0 ? 'TERSEDIA' : 'MENUNGGU ASET' }}
                 </span>
             </div>
         </div>
 
         {{-- Detail Produk --}}
-        <div class="p-5">
+        <div class="p-5 flex flex-col h-[140px]">
             <div class="flex justify-between items-start mb-2">
-                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-                    {{ $p->brand->fkategori->nama_kategori ?? 'Tanpa Kategori' }}
+                {{-- Diperbaiki: Relasi FKategori dihapus, memanggil Kategori dan Brand --}}
+                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest truncate pr-2">
+                    {{ $p->brand->kategori->nama_kategori ?? 'Tanpa Kategori' }} — {{ $p->brand->nama_brand ?? '' }}
                 </p>
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">
                     {{ $p->asets_count ?? 0 }} Stok
                 </p>
             </div>
 
-            <h4 class="font-bold text-lg text-white mb-4 line-clamp-1">{{ $p->nama_produk }}</h4>
+            <h4 class="font-bold text-lg text-white mb-4 line-clamp-1" title="{{ $p->nama_produk }}">
+                {{ $p->nama_produk }}
+            </h4>
 
             <div class="flex justify-between items-center mt-auto">
                 <p class="font-black text-xl text-[#DFFF00]">
@@ -67,10 +70,11 @@
                         ✏️
                     </a>
 
-                    <form action="{{ route('admin.produk.destroy', $p->id_produk) }}" method="POST">
+                    {{-- Diperbaiki: Menggunakan onsubmit agar alert browser muncul --}}
+                    <form action="{{ route('admin.produk.destroy', $p->id_produk) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini? Semua aset di dalamnya juga akan terhapus.');">
                         @csrf
                         @method('DELETE')
-                        <button type="button" class="btn-delete p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition" title="Hapus">
+                        <button type="submit" class="p-2 bg-white/5 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-500 transition" title="Hapus">
                             🗑️
                         </button>
                     </form>
