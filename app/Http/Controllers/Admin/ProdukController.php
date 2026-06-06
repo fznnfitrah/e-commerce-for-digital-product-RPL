@@ -5,30 +5,33 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Kategori;
+use App\Models\Brand; // WAJIB DIIMPOR: Untuk mengambil daftar brand di form
 use App\Models\Produk;
 use App\Models\AsetProduk;
 use Illuminate\Support\Facades\Storage;
 
 class ProdukController extends Controller
 {
-    //
     public function index()
     {
+        // Sudah benar menggunakan Eager Loading berantai (Nested Relationship)
         $produks = Produk::with('brand.kategori')->withCount('asets')->latest()->get();
         return view('admin.produk.index', compact('produks'));
     }
 
     public function create()
     {
-        $kategoris = Kategori::all();
-        return view('admin.produk.create', compact('kategoris'));
+        // Ubah pengambilan data dari Kategori menjadi Brand
+        // Agar di view, user memilih BRAND (yang mana Brand tersebut sudah mengikat Kategori)
+        $brands = Brand::with('kategori')->get();
+        return view('admin.produk.create', compact('brands'));
     }
 
     public function store(Request $request)
     {
-        // 1. Validasi Input (Tambahkan opsi tipe baru di in:...)
+        // 1. Validasi Input (Ubah id_kategori menjadi id_brand)
         $request->validate([
-            'id_kategori'      => 'required|exists:kategoris,id_kategori',
+            'id_brand'         => 'required|exists:brands,id_brand', // Mengarah ke tabel brands
             'nama_produk'      => 'required|string|max:255',
             'deskripsi_produk' => 'required|string',
             'harga_produk'     => 'required|numeric',
@@ -43,16 +46,16 @@ class ProdukController extends Controller
             ? $request->file('gambar')->store('produk-images', 'public')
             : null;
 
-        // 3. Simpan ke Tabel produk
+        // 3. Simpan ke Tabel produk (Gunakan id_brand)
         $produk = Produk::create([
-            'id_kategori'      => $request->id_kategori,
+            'id_brand'         => $request->id_brand, // MEMPERBAIKI ERROR COLUMN NOT FOUND
             'nama_produk'      => $request->nama_produk,
             'deskripsi_produk' => $request->deskripsi_produk,
             'harga_produk'     => $request->harga_produk,
             'gambar_produk'    => $pathGambar,
         ]);
 
-        // 4. Logika Aset berdasarkan Type
+        // 4. Logika Aset berdasarkan Type (Tetap dipertahankan karena sudah benar)
         if ($request->type == 'ebook') {
             $pathFile = $request->file('file_ebook')->store('ebooks', 'public');
             AsetProduk::create([
@@ -73,7 +76,6 @@ class ProdukController extends Controller
                 }
             }
         } elseif (in_array($request->type, ['pulsa', 'token', 'topup'])) {
-            // Otomatis buat 1 entitas aset sebagai penanda produk elektrik/instan aktif
             AsetProduk::create([
                 'id_produk' => $produk->id_produk,
                 'nama_aset' => 'Layanan Otomatis ' . ucfirst($request->type),
@@ -85,30 +87,27 @@ class ProdukController extends Controller
         return redirect()->route('admin.produk.index')->with('success', 'Produk Berhasil Disimpan!');
     }
 
-    // Menampilkan form edit
     public function edit($id)
     {
         $produk = Produk::findOrFail($id);
-        $kategoris = Kategori::all();
-        return view('admin.produk.edit', compact('produk', 'kategoris'));
+        $brands = Brand::with('kategori')->get(); // Ubah ke brand
+        return view('admin.produk.edit', compact('produk', 'brands'));
     }
 
-    // Memproses perubahan data
     public function update(Request $request, $id)
     {
         $produk = Produk::findOrFail($id);
 
+        // Validasi disesuaikan menggunakan id_brand
         $request->validate([
-            'id_kategori'      => 'required|exists:kategoris,id_kategori',
+            'id_brand'         => 'required|exists:brands,id_brand',
             'nama_produk'      => 'required|string|max:255',
             'deskripsi_produk' => 'required|string',
             'harga_produk'     => 'required|numeric',
             'gambar'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Handle upload gambar baru jika ada
         if ($request->hasFile('gambar')) {
-            // Hapus gambar lama jika ada
             if ($produk->gambar_produk) {
                 Storage::disk('public')->delete($produk->gambar_produk);
             }
@@ -116,8 +115,9 @@ class ProdukController extends Controller
             $produk->gambar_produk = $pathGambar;
         }
 
+        // Perbarui data menggunakan id_brand
         $produk->update([
-            'id_kategori'      => $request->id_kategori,
+            'id_brand'         => $request->id_brand, // MEMPERBAIKI ERROR COLUMN NOT FOUND
             'nama_produk'      => $request->nama_produk,
             'deskripsi_produk' => $request->deskripsi_produk,
             'harga_produk'     => $request->harga_produk,
@@ -126,17 +126,14 @@ class ProdukController extends Controller
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil diperbarui!');
     }
 
-    // Menghapus produk
     public function destroy($id)
     {
         $produk = Produk::findOrFail($id);
 
-        // Hapus gambar dari storage
         if ($produk->gambar_produk) {
             Storage::disk('public')->delete($produk->gambar_produk);
         }
 
-        // Aset terkait akan ikut terhapus jika Anda menggunakan onUpdate('cascade')->onDelete('cascade') di migration
         $produk->delete();
 
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil dihapus!');
