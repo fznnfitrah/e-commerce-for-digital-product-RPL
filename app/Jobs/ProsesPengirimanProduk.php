@@ -5,12 +5,14 @@ namespace App\Jobs;
 use App\Models\Transaksi;
 use App\Mail\StrukPembelianMail;
 use Illuminate\Bus\Queueable;
+use App\Models\AsetProduk;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class ProsesPengirimanProduk implements ShouldQueue
 {
@@ -31,42 +33,68 @@ class ProsesPengirimanProduk implements ShouldQueue
      */
     public function handle(): void
     {
-        // 1. Dapatkan nama produk dalam format huruf kecil untuk mendeteksi tipe produk
-        $namaProduk = strtolower($this->transaksi->produk->nama_produk ?? '');
-        $sn_dummy = '';
+        // 1. DETEKSI TIPE DARI NAMA ASET PERTAMA YANG DITEMUKAN
+        $contohAset = \App\Models\AsetProduk::where('id_produk', $this->transaksi->id_produk)->first();
+        $namaAset = strtolower($contohAset->nama_aset ?? '');
 
-        // 2. Logika Pembuatan Kode Dummy berdasarkan nama produk
-        if (Str::contains($namaProduk, 'token') || Str::contains($namaProduk, 'pln')) {
-            // Format Token PLN: 20 Digit Angka (Contoh: 1234-5678-9012-3456-7890)
-            $sn_dummy = sprintf("%04d-%04d-%04d-%04d-%04d", random_int(1000, 9999), random_int(1000, 9999), random_int(1000, 9999), random_int(1000, 9999), random_int(1000, 9999));
-        
-        } elseif (Str::contains($namaProduk, 'premium') || Str::contains($namaProduk, 'netflix') || Str::contains($namaProduk, 'spotify')) {
-            // Format Akun Premium: Email & Password
-            $sn_dummy = "Email: user".random_int(100,999)."@premium.com | Pass: JStore".Str::random(5);
-        
-        } elseif (Str::contains($namaProduk, 'book') || Str::contains($namaProduk, 'e-book')) {
-            // Format E-book: Link Download (Dummy)
-            $sn_dummy = "Link Akses: https://j-store.com/download/".Str::random(10);
-            
-        } else {
-            // Default (Pulsa/Game): Format Serial Number PPOB
-            $sn_dummy = 'SN: JST-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4));
+        $typeProduk = 'topup'; // Default
+        if (Str::contains($namaAset, 'e-book') || Str::contains($namaAset, 'ebook')) {
+            $typeProduk = 'ebook';
+        } elseif (Str::contains($namaAset, 'akun')) {
+            $typeProduk = 'akun';
+        } elseif (Str::contains($namaAset, 'token')) {
+            $typeProduk = 'token';
         }
 
-        // 3. Tentukan Email Tujuan
-        // Cek apakah id_target adalah email (karena form E-book menggunakan email di id_target)
-        // Jika bukan, gunakan kontak_pelanggan
-        $emailTujuan = filter_var($this->transaksi->id_target, FILTER_VALIDATE_EMAIL) 
-                        ? $this->transaksi->id_target 
-                        : $this->transaksi->kontak_pelanggan;
+        $sn_dummy = '';
+        $file_path = null;
+        $aset = null;
 
-        // Validasi terakhir untuk memastikan ada format email yang valid sebelum mengirim
-        if (filter_var($emailTujuan, FILTER_VALIDATE_EMAIL)) {
-            // 4. Kirim Email (Akan otomatis masuk ke Mailtrap)
-            Mail::to($emailTujuan)->send(new StrukPembelianMail($this->transaksi, $sn_dummy));
+        // 2. LOGIKA PENCARIAN & LOCKING ASET
+        if ($typeProduk === 'akun') {
+            // Khusus Akun: Cari yang belum terjual dan Kunci
+            $aset = \App\Models\AsetProduk::where('id_produk', $this->transaksi->id_produk)
+                ->where('is_sold', 0)
+                ->first();
+            if ($aset) {
+                $aset->is_sold = 1;
+                $aset->save();
+            }
         } else {
-            // Opsional: Jika nomor HP, log saja karena ini proyek sekolah (tanpa API WA asli)
-            \Illuminate\Support\Facades\Log::info("Produk terkirim ke Nomor/Target: " . $emailTujuan . " dengan SN: " . $sn_dummy);
+            // Ebook & Layanan Otomatis: Ambil data asetnya tanpa di-lock (Unlimited)
+            $aset = $contohAset;
+        }
+
+        // 3. FULFILLMENT BERDASARKAN TIPE
+        if ($typeProduk === 'akun') {
+            if ($aset) {
+                $sn_dummy = "Kredensial Akun: " . $aset->deskripsi;
+            } else {
+                $sn_dummy = "Status: Stok Habis - Akan Dikirim Setelah Restock.";
+            }
+        } elseif ($typeProduk === 'ebook') {
+            if ($aset && $aset->link_file) {
+                $file_path = $aset->link_file;
+                $sn_dummy = "File E-Book telah dilampirkan pada email ini. Selamat membaca!";
+            } else {
+                $sn_dummy = "Status: File E-Book tidak ditemukan di server. Harap hubungi Admin.";
+            }
+        } elseif ($typeProduk === 'token') {
+            $sn_dummy = sprintf("%04d-%04d-%04d-%04d-%04d", random_int(1000, 9999), random_int(1000, 9999), random_int(1000, 9999), random_int(1000, 9999), random_int(1000, 9999));
+        } else {
+            $idTarget = $this->transaksi->id_target;
+            $sn_dummy = 'Target: ' . $idTarget . ' | SN: JST-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4));
+        }
+
+        // 4. KIRIM EMAIL (Kode pengiriman tetap sama seperti sebelumnya...)
+        $emailTujuan = filter_var($this->transaksi->id_target, FILTER_VALIDATE_EMAIL)
+            ? $this->transaksi->id_target
+            : $this->transaksi->kontak_pelanggan;
+
+        if (filter_var($emailTujuan, FILTER_VALIDATE_EMAIL)) {
+            Mail::to($emailTujuan)->send(new StrukPembelianMail($this->transaksi, $sn_dummy, $file_path));
+        } else {
+            Log::info("Produk terkirim ke Nomor/Target: " . $emailTujuan . " dengan info: " . $sn_dummy);
         }
     }
 }

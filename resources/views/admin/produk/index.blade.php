@@ -20,6 +20,19 @@
 </div>
 
 {{-- GRID PRODUK --}}
+{{-- NOTIFIKASI SUKSES --}}
+@if(session('success'))
+<div class="mb-6 p-4 bg-green-500/10 border border-green-500/30 text-green-400 rounded-2xl">
+    ✅ {{ session('success') }}
+</div>
+@endif
+
+{{-- NOTIFIKASI ERROR (WAJIB DITAMBAHKAN) --}}
+@if(session('error'))
+<div class="mb-6 p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-2xl font-semibold">
+    ⚠️ {{ session('error') }}
+</div>
+@endif
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
     @forelse($produks as $p)
     <div class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-md group hover:border-blue-500/50 transition-all duration-300">
