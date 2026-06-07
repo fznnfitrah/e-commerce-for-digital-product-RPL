@@ -37,10 +37,10 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    {{-- DROPDOWN KATEGORI (Hanya untuk filter visual) --}}
+                    {{-- DROPDOWN KATEGORI (Ditambahkan Name agar old() berfungsi) --}}
                     <div>
                         <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Kategori</label>
-                        <select id="select_kategori" required onchange="handleKategoriChange()"
+                        <select name="id_kategori" id="select_kategori" required onchange="handleKategoriChange()"
                             class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                             <option value="">Pilih Kategori</option>
                             @foreach($brands->pluck('kategori')->unique('id_kategori') as $kat)
@@ -60,7 +60,7 @@
                             class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                             <option value="">Pilih Sub-Brand</option>
                             @foreach($brands as $b)
-                            <option value="{{ $b->id_brand }}" data-kategori="{{ $b->id_kategori }}" {{ (old('id_brand', $produk->id_brand) == $b->id_brand) ? 'selected' : '' }}>
+                            <option value="{{ $b->id_brand }}" data-kategori="{{ $b->id_kategori }}">
                                 {{ $b->nama_brand }}
                             </option>
                             @endforeach
@@ -110,13 +110,22 @@
                 </div>
 
                 {{-- INFO TYPE --}}
+                @php
+                $asetTerkait = \App\Models\AsetProduk::where('id_produk', $produk->id_produk)->first();
+                $namaAset = strtolower($asetTerkait->nama_aset ?? '');
+
+                $labelTipe = 'Layanan Instan';
+                if(str_contains($namaAset, 'e-book') || str_contains($namaAset, 'ebook')) $labelTipe = 'E-Book (File)';
+                elseif(str_contains($namaAset, 'akun')) $labelTipe = 'Akun Premium';
+                @endphp
+
                 <div class="mt-10 p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
-                    <p class="text-[10px] text-yellow-500 font-bold uppercase mb-1">Tipe Produk</p>
+                    <p class="text-[10px] text-yellow-500 font-bold uppercase mb-1">Tipe Produk Terdeteksi</p>
                     <p class="text-sm font-bold text-white uppercase tracking-widest">
-                        {{ $produk->type ?? 'Layanan Instan' }}
+                        {{ $labelTipe }}
                     </p>
                     <p class="text-[10px] text-gray-500 mt-2 italic">
-                        *Tipe produk tidak dapat diubah setelah dibuat untuk menjaga integritas data aset.
+                        *Tipe dideteksi otomatis berdasarkan konfigurasi aset yang dibuat.
                     </p>
                 </div>
             </div>
@@ -149,32 +158,39 @@
     let masterBrandOptions = [];
     document.addEventListener('DOMContentLoaded', function() {
         const selectBrand = document.getElementById('select_brand');
-        masterBrandOptions = Array.from(selectBrand.options);
 
-        // Simpan nilai brand awal (yang dari database)
-        const initialBrandValue = selectBrand.value;
+        // Simpan referensi ke semua option asli di memori
+        masterBrandOptions = Array.from(selectBrand.options).map(opt => opt.cloneNode(true));
 
-        // Panggil filter untuk membersihkan list berdasarkan kategori saat ini
+        // Panggil filter untuk menyesuaikan isi dropdown brand
         handleKategoriChange();
-
-        // Kembalikan pilihan brand ke kondisi awal
-        selectBrand.value = initialBrandValue;
     });
 
     function handleKategoriChange() {
         const idKategoriTerpilih = document.getElementById('select_kategori').value;
         const selectBrand = document.getElementById('select_brand');
 
+        // Ambil nilai brand target (bisa dari input sebelumnya jika error, atau dari database)
+        const targetBrandValue = "{{ old('id_brand', $produk->id_brand) }}";
+
         // Reset Dropdown
         selectBrand.innerHTML = '';
-        selectBrand.appendChild(masterBrandOptions[0]); // Opsi default
+        selectBrand.appendChild(masterBrandOptions[0].cloneNode(true)); // Opsi default
 
+        // Loop dan masukkan kembali option yang sesuai kategori
         masterBrandOptions.forEach(function(option) {
             const kategoriAset = option.getAttribute('data-kategori');
 
             if (idKategoriTerpilih === "" || kategoriAset === idKategoriTerpilih) {
                 if (option.value !== "") {
-                    selectBrand.appendChild(option);
+                    let newOption = option.cloneNode(true);
+
+                    // Tandai 'selected' jika value cocok dengan target
+                    if (newOption.value === targetBrandValue) {
+                        newOption.selected = true;
+                    }
+
+                    selectBrand.appendChild(newOption);
                 }
             }
         });

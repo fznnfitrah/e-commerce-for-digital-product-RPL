@@ -63,7 +63,7 @@
 
                 @error('id_produk')
                 <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500 text-red-500 text-sm font-semibold">
-                    Pilih produk nominal terlebih dahulu.
+                    {{ $message }}
                 </div>
                 @enderror
 

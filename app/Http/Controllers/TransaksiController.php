@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Transaksi;
 use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use App\Models\AsetProduk;
 use Midtrans\Config;
 use Midtrans\Snap;
 use App\Jobs\ProsesPengirimanProduk;
@@ -34,6 +37,32 @@ class TransaksiController extends Controller
         ]);
 
         $produk = Produk::findOrFail($request->id_produk);
+
+        $stokTersedia = AsetProduk::where('id_produk', $produk->id_produk)
+            ->where('is_sold', 0)
+            ->count();
+
+        if ($produk->type === 'akun') {
+            $stokTersedia = AsetProduk::where('id_produk', $produk->id_produk)
+                ->where('is_sold', 0)
+                ->count();
+        }
+
+        $contohAset = AsetProduk::where('id_produk', $produk->id_produk)->first();
+        $isAkun = $contohAset && Str::contains(strtolower($contohAset->nama_aset), 'akun');
+
+        // Hanya hitung stok jika produk tersebut adalah Akun
+        if ($isAkun) {
+            $stokTersedia = AsetProduk::where('id_produk', $produk->id_produk)
+                ->where('is_sold', 0)
+                ->count();
+
+            if ($stokTersedia < 1) {
+                return back()->withInput()->withErrors([
+                    'id_produk' => 'Mohon maaf, stok akun untuk produk "' . $produk->nama_produk . '" saat ini sedang kosong.'
+                ]);
+            }
+        }
 
         // 2. Simpan data (tanpa invoice_no)
         $transaksi = Transaksi::create([
@@ -102,7 +131,7 @@ class TransaksiController extends Controller
 
     public function callback(Request $request)
     {
-        \Illuminate\Support\Facades\Log::info('Webhook Midtrans Masuk:', $request->all());
+        Log::info('Webhook Midtrans Masuk:', $request->all());
 
         // 1. Verifikasi keamanan (Signature Key) dari Midtrans
         $serverKey = config('midtrans.server_key');
