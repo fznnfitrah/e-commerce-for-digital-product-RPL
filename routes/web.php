@@ -5,7 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\ProdukController;
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PromoController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Auth\LoginController;
@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\UserController;
 use App\Models\Produk;
 
 /*
@@ -34,6 +35,17 @@ Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout'])->na
 // Route untuk menampilkan halaman invoice beserta pop-up Midtrans
 Route::get('/transaksi/pembayaran/{id_transaksi}', [TransaksiController::class, 'pembayaran'])->name('transaksi.pembayaran');
 
+// Pastikan ini ada di luar route admin, tapi di dalam middleware auth
+Route::middleware(['auth'])->group(function () {
+    // Halaman Riwayat Pembelian
+    Route::get('/user/riwayat', [UserController::class, 'riwayat'])->name('user.riwayat');
+
+    // Menampilkan Form Ulasan
+    Route::get('/transaksi/{id_transaksi}/review', [UserController::class, 'createReview'])->name('user.review.create');
+    
+    // Menyimpan Data Ulasan ke Database
+    Route::post('/transaksi/{id_transaksi}/review', [UserController::class, 'storeReview'])->name('user.review.store');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -96,11 +108,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Pengelolaan User -> /admin/users/...
     Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::patch('/{id}/role', [UserController::class, 'updateRole'])->name('updateRole');
-        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+        Route::get('/', [AdminUserController::class, 'index'])->name('index');
+        Route::patch('/{id}/role', [AdminUserController::class, 'updateRole'])->name('updateRole');
+        Route::delete('/{id}', [AdminUserController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/edit', [AdminUserController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AdminUserController::class, 'update'])->name('update');
     });
 
 
