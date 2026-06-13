@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kategori;
 use App\Models\Brand;
 use App\Models\Produk;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -23,8 +24,14 @@ class HomeController extends Controller
             return $item->brand->kategori->nama_kategori ?? 'Lainnya';
         });
 
+        $ulasanPilihan = Review::with(['transaksi.produk'])
+            ->where('rating', '>=', 4)
+            ->latest()
+            ->take(10)
+            ->get();
+
         // Kembalikan variabel yang dibutuhkan oleh view dashboard Anda
-        return view('dashboard', compact('kategoris', 'produkByKategori'));
+        return view('dashboard', compact('kategoris', 'produkByKategori', 'ulasanPilihan'));
     }
 
     public function detail($id_brand)
