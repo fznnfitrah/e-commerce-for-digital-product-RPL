@@ -7,9 +7,9 @@
             <div class="hidden md:flex gap-6 text-sm">
                 <a href="#" class="hover:text-blue-400">Top Up</a>
                 
-                {{-- PERBAIKAN DI SINI: Logika Riwayat Pembelian --}}
+                {{-- PERBAIKAN: Arahkan ke route 'user.riwayat' jika sudah login --}}
                 @auth
-                    <a href="#" class="hover:text-blue-400">Riwayat Pembelian</a>
+                    <a href="{{ route('user.riwayat') }}" class="hover:text-blue-400">Riwayat Pembelian</a>
                 @else
                     <a href="{{ route('login') }}" class="hover:text-blue-400">Riwayat Pembelian</a>
                 @endauth
