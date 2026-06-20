@@ -70,6 +70,15 @@ class HomeController extends Controller
         return view($view, compact('brand', 'kategori', 'items'));
     }
 
+    public function checkoutEbook($id_produk)
+    {
+        // 1. Tarik data produk berdasarkan ID yang dikirim dari rute dashboard
+        $produk = Produk::findOrFail($id_produk);
+
+        // 2. Arahkan ke file view khusus checkout e-book yang sudah kita refactor
+        return view('produks.e-book.ebook-detail', compact('produk'));
+    }
+
     public function kategoriAll($nama)
     {
         // Cari kategori berdasarkan nama persis dari URL, lalu tarik semua brand-nya

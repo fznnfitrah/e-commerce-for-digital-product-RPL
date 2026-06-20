@@ -244,4 +244,5 @@
         }
     }
 </style>
+
 @endsection

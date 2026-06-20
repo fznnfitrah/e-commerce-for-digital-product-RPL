@@ -25,33 +25,26 @@ class TransaksiController extends Controller
 
     public function checkout(Request $request)
     {
-        // 1. TAMBAHKAN id_target DI SINI AGAR TIDAK BISA LOLOS JIKA KOSONG
+        // 1. VALIDASI INPUT
+        // id_target bertindak sebagai Email untuk E-book, dan ID Game untuk Topup
+        // kontak_pelanggan bertindak sebagai No WA (opsional)
         $request->validate([
             'id_produk'         => 'required|exists:produks,id_produk',
-            'id_target'         => 'required|string|min:3', // Mewajibkan Email/ID Akun
+            'id_target'         => 'required|string|min:3',
+            'kontak_pelanggan'  => 'nullable|string',
             'metode_pembayaran' => 'required|string'
         ], [
-            // Pesan error kustom agar lebih ramah dibaca pengguna
-            'id_target.required'         => 'ID Target / Email wajib diisi.',
+            'id_target.required'         => 'Email / ID Target wajib diisi.',
             'metode_pembayaran.required' => 'Silakan pilih metode pembayaran terlebih dahulu.'
         ]);
 
         $produk = Produk::findOrFail($request->id_produk);
 
-        $stokTersedia = AsetProduk::where('id_produk', $produk->id_produk)
-            ->where('is_sold', 0)
-            ->count();
-
-        if ($produk->type === 'akun') {
-            $stokTersedia = AsetProduk::where('id_produk', $produk->id_produk)
-                ->where('is_sold', 0)
-                ->count();
-        }
-
+        // 2. CEK STOK (HANYA UNTUK TIPE AKUN)
+        // REFAKTOR: Menghapus 3 query berulang menjadi 1 eksekusi yang efisien
         $contohAset = AsetProduk::where('id_produk', $produk->id_produk)->first();
         $isAkun = $contohAset && Str::contains(strtolower($contohAset->nama_aset), 'akun');
 
-        // Hanya hitung stok jika produk tersebut adalah Akun
         if ($isAkun) {
             $stokTersedia = AsetProduk::where('id_produk', $produk->id_produk)
                 ->where('is_sold', 0)
@@ -64,21 +57,17 @@ class TransaksiController extends Controller
             }
         }
 
-        // 2. Simpan data (tanpa invoice_no)
+        // 3. SIMPAN KE DATABASE
         $transaksi = Transaksi::create([
             'id_users'          => auth()->id() ?? null,
             'id_produk'         => $produk->id_produk,
-            'kontak_pelanggan'  => $request->kontak_pelanggan ?? '-',
-
-            // Karena id_target sudah divalidasi 'required' di atas, 
-            // kita bisa langsung memasukkannya tanpa default '?? -'
-            'id_target'         => $request->id_target,
-
+            'kontak_pelanggan'  => $request->kontak_pelanggan ?? '-', // WA opsional aman tersimpan
+            'id_target'         => $request->id_target,               // Email E-book aman tersimpan
             'id_server'         => $request->id_server ?? null,
             'total_pembelian'   => $produk->harga_jual ?? $produk->harga_produk,
             'total_akhir'       => $produk->harga_jual ?? $produk->harga_produk,
             'metode_pembayaran' => $request->metode_pembayaran,
-            'status_pembayaran' => 'pending', // Kunci keamanan berhasil diterapkan
+            'status_pembayaran' => 'pending',
         ]);
 
         return redirect()->route('transaksi.pembayaran', $transaksi->id_transaksi);

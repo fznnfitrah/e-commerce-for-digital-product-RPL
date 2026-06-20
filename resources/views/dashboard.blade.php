@@ -158,7 +158,10 @@
     <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-12">
         @if($ebooks->count() > 0)
         @foreach($ebooks as $produk)
-        <a href="{{ route('produk.detail', $ebookBrand->id_brand) }}" class="group block">
+
+        {{-- REFAKTOR: Ubah rute menjadi rute khusus Direct Checkout Ebook --}}
+        <a href="{{ route('produk.detail', ['id' => $ebookBrand->id_brand, 'selected' => $produk->id_produk]) }}" class="group block">
+
             <div class="rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/0 border border-blue-500/20 backdrop-blur-xl transition hover:-translate-y-2 hover:border-blue-400/60 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] float">
                 <div class="relative h-44 flex items-center justify-center overflow-hidden rounded-t-2xl bg-gradient-to-b from-blue-500/10 to-black/40">
                     <img src="{{ $produk->gambar_produk ? asset('storage/' . $produk->gambar_produk) : asset('images/ebook-placeholder.png') }}"

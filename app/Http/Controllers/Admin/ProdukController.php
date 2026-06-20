@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Kategori;
-use App\Models\Brand; 
+use App\Models\Brand;
 use App\Models\Produk;
 use App\Models\Transaksi;
 use App\Models\AsetProduk;
@@ -56,7 +56,7 @@ class ProdukController extends Controller
             'gambar_produk'    => $pathGambar,
         ]);
 
-        $validProduk = $produk->id_produk ?? $produk->id; 
+        $validProduk = $produk->id_produk ?? $produk->id;
 
         // 4. Logika Aset berdasarkan Type (Tetap dipertahankan karena sudah benar)
         if ($request->type == 'ebook') {
@@ -101,30 +101,33 @@ class ProdukController extends Controller
     {
         $produk = Produk::findOrFail($id);
 
-        // Validasi disesuaikan menggunakan id_brand
         $request->validate([
             'id_brand'         => 'required|exists:brands,id_brand',
             'nama_produk'      => 'required|string|max:255',
             'deskripsi_produk' => 'required|string',
             'harga_produk'     => 'required|numeric',
-            'gambar'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'gambar'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // Batas aman 5MB
         ]);
 
-        if ($request->hasFile('gambar')) {
-            if ($produk->gambar_produk) {
-                Storage::disk('public')->delete($produk->gambar_produk);
-            }
-            $pathGambar = $request->file('gambar')->store('produk-images', 'public');
-            $produk->gambar_produk = $pathGambar;
-        }
-
-        // Perbarui data menggunakan id_brand
-        $produk->update([
-            'id_brand'         => $request->id_brand, 
+        // Siapkan data yang pasti akan diupdate
+        $dataUpdate = [
+            'id_brand'         => $request->id_brand,
             'nama_produk'      => $request->nama_produk,
             'deskripsi_produk' => $request->deskripsi_produk,
             'harga_produk'     => $request->harga_produk,
-        ]);
+        ];
+
+        // Jika user mengupload gambar baru, proses dan masukkan ke dalam array update
+        if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if ($produk->gambar_produk) {
+                Storage::disk('public')->delete($produk->gambar_produk);
+            }
+            // Simpan gambar baru
+            $dataUpdate['gambar_produk'] = $request->file('gambar')->store('produk-images', 'public');
+        }
+
+        $produk->update($dataUpdate);
 
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil diperbarui!');
     }
