@@ -61,7 +61,8 @@
         <h3 class="text-2xl font-black italic uppercase text-white galaxy-title flex items-center gap-3">
             <span class="w-2 h-8 bg-gradient-to-b from-blue-600 to-purple-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></span> 🎮 Topup Games Populer
         </h3>
-        <a href="{{ route('kategori.all', 'Topup Games') }}" class="group text-sm font-bold text-blue-500 hover:text-blue-300 flex items-center gap-2 transition">
+        {{-- REFAKTOR: Gunakan nama_kategori dari database --}}
+        <a href="{{ route('kategori.all', $topupCategory ? $topupCategory->nama_kategori : 'Topup') }}" class="group text-sm font-bold text-blue-500 hover:text-blue-300 flex items-center gap-2 transition">
             LIHAT SEMUA
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -100,7 +101,8 @@
         <h3 class="text-2xl font-black italic uppercase text-white galaxy-title flex items-center gap-3">
             <span class="w-2 h-8 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.5)]"></span> 📱 Aplikasi Premium
         </h3>
-        <a href="{{ route('kategori.all', 'Aplikasi Premium') }}" class="group text-sm font-bold text-purple-500 hover:text-purple-300 flex items-center gap-2 transition">
+        {{-- REFAKTOR: Gunakan nama_kategori dari database --}}
+        <a href="{{ route('kategori.all', $appsCategory ? $appsCategory->nama_kategori : 'Apps') }}" class="group text-sm font-bold text-purple-500 hover:text-purple-300 flex items-center gap-2 transition">
             LIHAT SEMUA
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

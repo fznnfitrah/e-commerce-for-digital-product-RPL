@@ -69,4 +69,14 @@ class HomeController extends Controller
 
         return view($view, compact('brand', 'kategori', 'items'));
     }
+
+    public function kategoriAll($nama)
+    {
+        // Cari kategori berdasarkan nama persis dari URL, lalu tarik semua brand-nya
+        $kategori = Kategori::with('brands')->where('nama_kategori', $nama)->firstOrFail();
+
+        $brands = $kategori->brands;
+
+        return view('kategori-all', compact('kategori', 'brands', 'nama'));
+    }
 }
