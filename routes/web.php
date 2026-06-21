@@ -23,11 +23,13 @@ use App\Models\Produk;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('dashboard');
+
 Route::get('/produk-detail/{id}', [HomeController::class, 'detail'])->name('produk.detail');
 
-Route::get('/kategori/{nama}', function ($nama) {
-    return view('kategori-all', ['kategori' => $nama]);
-})->name('kategori.all');
+Route::get('/checkout-ebook/{id_produk}', [HomeController::class, 'checkoutEbook'])->name('checkout.ebook');
+
+// Hapus atau ganti rute yang lama dengan ini:
+Route::get('/kategori/{nama}', [HomeController::class, 'kategoriAll'])->name('kategori.all');
 
 // Route untuk memproses form order dari halaman detail produk
 Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout'])->name('transaksi.checkout');
@@ -35,14 +37,14 @@ Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout'])->na
 // Route untuk menampilkan halaman invoice beserta pop-up Midtrans
 Route::get('/transaksi/pembayaran/{id_transaksi}', [TransaksiController::class, 'pembayaran'])->name('transaksi.pembayaran');
 
-// Pastikan ini ada di luar route admin, tapi di dalam middleware auth
+// Route untuk menampilkan halaman sukses pembayaran
 Route::middleware(['auth'])->group(function () {
     // Halaman Riwayat Pembelian
     Route::get('/user/riwayat', [UserController::class, 'riwayat'])->name('user.riwayat');
 
     // Menampilkan Form Ulasan
     Route::get('/transaksi/{id_transaksi}/review', [UserController::class, 'createReview'])->name('user.review.create');
-    
+
     // Menyimpan Data Ulasan ke Database
     Route::post('/transaksi/{id_transaksi}/review', [UserController::class, 'storeReview'])->name('user.review.store');
 });

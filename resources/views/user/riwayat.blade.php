@@ -56,7 +56,7 @@
                 </div>
                 @else
                 {{-- Nanti href ini akan kita arahkan ke form review --}}
-                <a href="#" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-lg shadow-blue-600/30 active:scale-95">
+                <a href="{{ route('user.review.create', $trx->id_transaksi) }}" class="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-lg shadow-blue-600/30 active:scale-95">
                     ⭐ Beri Ulasan
                 </a>
                 @endif

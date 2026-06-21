@@ -53,7 +53,6 @@
 
     {{-- TOPUP SECTION --}}
     @php
-    // Mengambil kategori murni Topup dan mengambil data relasi Brands di dalamnya
     $topupCategory = $kategoris->whereIn('nama_kategori', ['Topup', 'Top-up', 'Topup Games'])->first();
     $gameBrands = $topupCategory ? $topupCategory->brands : collect();
     @endphp
@@ -62,7 +61,8 @@
         <h3 class="text-2xl font-black italic uppercase text-white galaxy-title flex items-center gap-3">
             <span class="w-2 h-8 bg-gradient-to-b from-blue-600 to-purple-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></span> 🎮 Topup Games Populer
         </h3>
-        <a href="{{ route('kategori.all', 'Topup Games') }}" class="group text-sm font-bold text-blue-500 hover:text-blue-300 flex items-center gap-2 transition">
+        {{-- REFAKTOR: Gunakan nama_kategori dari database --}}
+        <a href="{{ route('kategori.all', $topupCategory ? $topupCategory->nama_kategori : 'Topup') }}" class="group text-sm font-bold text-blue-500 hover:text-blue-300 flex items-center gap-2 transition">
             LIHAT SEMUA
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -101,7 +101,8 @@
         <h3 class="text-2xl font-black italic uppercase text-white galaxy-title flex items-center gap-3">
             <span class="w-2 h-8 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.5)]"></span> 📱 Aplikasi Premium
         </h3>
-        <a href="{{ route('kategori.all', 'Aplikasi Premium') }}" class="group text-sm font-bold text-purple-500 hover:text-purple-300 flex items-center gap-2 transition">
+        {{-- REFAKTOR: Gunakan nama_kategori dari database --}}
+        <a href="{{ route('kategori.all', $appsCategory ? $appsCategory->nama_kategori : 'Apps') }}" class="group text-sm font-bold text-purple-500 hover:text-purple-300 flex items-center gap-2 transition">
             LIHAT SEMUA
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -133,16 +134,12 @@
 
     {{-- E-BOOK TERLARIS SECTION --}}
     @php
-    // Gunakan filter dengan Str::lower agar tidak terpengaruh huruf besar/kecil atau strip (-)
     $ebookCategory = $kategoris->filter(function($kategori) {
     $nama = Str::lower($kategori->nama_kategori);
     return Str::contains($nama, 'book') || Str::contains($nama, 'ebook');
     })->first();
 
-    // Ambil brand pertama yang terikat dengan kategori E-Book tersebut
     $ebookBrand = $ebookCategory ? $ebookCategory->brands->first() : null;
-
-    // Ambil maksimal 5 produk dari brand tersebut
     $ebooks = $ebookBrand ? $ebookBrand->produks->take(5) : collect();
     @endphp
 
@@ -161,8 +158,10 @@
     <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-12">
         @if($ebooks->count() > 0)
         @foreach($ebooks as $produk)
-        {{-- Arahkan ke detail brand penampungnya --}}
-        <a href="{{ route('produk.detail', $ebookBrand->id_brand) }}" class="group block">
+
+        {{-- REFAKTOR: Ubah rute menjadi rute khusus Direct Checkout Ebook --}}
+        <a href="{{ route('produk.detail', ['id' => $ebookBrand->id_brand, 'selected' => $produk->id_produk]) }}" class="group block">
+
             <div class="rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/0 border border-blue-500/20 backdrop-blur-xl transition hover:-translate-y-2 hover:border-blue-400/60 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] float">
                 <div class="relative h-44 flex items-center justify-center overflow-hidden rounded-t-2xl bg-gradient-to-b from-blue-500/10 to-black/40">
                     <img src="{{ $produk->gambar_produk ? asset('storage/' . $produk->gambar_produk) : asset('images/ebook-placeholder.png') }}"
@@ -183,11 +182,9 @@
 
     {{-- PULSA & TOKEN SECTION --}}
     @php
-    // 1. Ambil kategori murni untuk masing-masing utilitas
     $pulsaCategory = $kategoris->whereIn('nama_kategori', ['Pulsa Provider', 'Pulsa & Data', 'Pulsa'])->first();
     $tokenCategory = $kategoris->whereIn('nama_kategori', ['Token Listrik', 'Token'])->first();
 
-    // 2. Ambil sampel satu brand saja dari masing-masing kategori sebagai gerbang rute detail
     $pulsaGateBrand = $pulsaCategory ? $pulsaCategory->brands->first() : null;
     $tokenGateBrand = $tokenCategory ? $tokenCategory->brands->first() : null;
     @endphp
@@ -196,17 +193,10 @@
         <h3 class="text-2xl font-black italic uppercase text-white galaxy-title flex items-center gap-3">
             <span class="w-2 h-8 bg-gradient-to-b from-yellow-500 to-orange-600 rounded-full shadow-[0_0_10px_rgba(234,179,8,0.5)]"></span> ⚡ Pulsa & Token Listrik
         </h3>
-        <!-- <a href="{{ route('kategori.all', 'Utilitas') }}" class="group text-sm font-bold text-yellow-500 hover:text-yellow-300 flex items-center gap-2 transition">
-            LIHAT SEMUA
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-        </a> -->
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-12">
 
-        {{-- KARTU 1: PINTU GERBANG UTAMA PULSA --}}
         @if($pulsaGateBrand)
         <a href="{{ route('produk.detail', $pulsaGateBrand->id_brand) }}" class="group block">
             <div class="rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1c23] to-[#0f1116] border border-yellow-500/20 backdrop-blur-xl transition hover:-translate-y-2 hover:border-yellow-400/60 hover:shadow-[0_0_30px_rgba(234,179,8,0.3)] text-center float">
@@ -222,7 +212,6 @@
         </a>
         @endif
 
-        {{-- KARTU 2: PINTU GERBANG UTAMA TOKEN LISTRIK --}}
         @if($tokenGateBrand)
         <a href="{{ route('produk.detail', $tokenGateBrand->id_brand) }}" class="group block">
             <div class="rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1c23] to-[#0f1116] border border-yellow-500/20 backdrop-blur-xl transition hover:-translate-y-2 hover:border-yellow-400/60 hover:shadow-[0_0_30px_rgba(234,179,8,0.3)] text-center float">
@@ -238,14 +227,82 @@
         </a>
         @endif
 
-        {{-- JIKA KEDUA DATA BELUM TERSEDIA --}}
         @if(!$pulsaGateBrand && !$tokenGateBrand)
         <p class="text-gray-500 col-span-full italic text-sm">Kategori utilitas pulsa atau token belum tersedia di database.</p>
         @endif
 
     </div>
+</div> {{-- AKHIR DARI MAIN CONTENT CONTAINER --}}
 
+{{-- SEKSI ULASAN PELANGGAN (SOCIAL PROOF) --}}
+@if(isset($ulasanPilihan) && $ulasanPilihan->isNotEmpty())
+<div class="container mx-auto px-4 pb-16 max-w-6xl">
+    <div class="text-center mb-10">
+        <h2 class="text-3xl font-black text-white uppercase italic tracking-tighter">Apa Kata Mereka?</h2>
+        <p class="text-gray-400 text-sm mt-2">Ribuan transaksi berhasil setiap harinya di J-Store.</p>
+    </div>
+
+    {{-- KOTAK SCROLLER BERJALAN --}}
+    <div class="relative max-h-[400px] overflow-hidden rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm p-6 shadow-2xl group">
+
+        {{-- Efek blur transparan di atas dan bawah --}}
+        <div class="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-[#0f1116] to-transparent z-10 rounded-t-3xl"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0f1116] to-transparent z-10 rounded-b-3xl"></div>
+
+        {{-- Container yang dianimasikan --}}
+        <div class="animate-scroll-vertical hover:[animation-play-state:paused] flex flex-col gap-4">
+
+            {{-- Loop Ganda untuk Seamless Animation --}}
+            @for ($i = 0; $i < 2; $i++)
+                @foreach($ulasanPilihan as $ulasan)
+                <div class="bg-black/40 border border-white/5 p-5 rounded-2xl flex items-start gap-4 transition-colors hover:border-white/10">
+                <div class="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400 font-black text-xl shrink-0">
+                    👤
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <h4 class="text-white font-bold text-sm">{{ $ulasan->transaksi->user->name ?? 'Pembeli Rahasia' }}</h4>
+                        <span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Verified</span>
+                    </div>
+
+                    {{-- Bintang Rating --}}
+                    <div class="text-yellow-400 text-xs mb-2">
+                        @for($s = 1; $s <= 5; $s++)
+                            @if($s <=$ulasan->rating) ★ @else <span class="text-gray-600">★</span> @endif
+                            @endfor
+                    </div>
+
+                    <p class="text-gray-300 text-sm italic">"{{ $ulasan->komentar }}"</p>
+
+                    {{-- Nama Produk yang dibeli --}}
+                    <div class="mt-3 inline-block bg-white/5 px-3 py-1 rounded-lg text-xs font-semibold text-gray-400 border border-white/5">
+                        Membeli: <span class="text-blue-400">{{ $ulasan->transaksi->produk->nama_produk ?? 'Produk Digital' }}</span>
+                    </div>
+                </div>
+        </div>
+        @endforeach
+        @endfor
+
+    </div>
 </div>
+</div>
+
+<style>
+    .animate-scroll-vertical {
+        animation: scrollVert 30s linear infinite;
+    }
+
+    @keyframes scrollVert {
+        0% {
+            transform: translateY(0);
+        }
+
+        100% {
+            transform: translateY(-50%);
+        }
+    }
+</style>
+@endif
 
 {{-- FLOATING WHATSAPP BUTTON --}}
 <a href="https://wa.me/6285172280957" target="_blank"
