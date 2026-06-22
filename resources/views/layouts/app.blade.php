@@ -7,7 +7,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>J-Store - Produk Digital Tercepat</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <link rel="icon" type="image/png" href="{{ asset('/images/logo.png') }}">
     <style>
         * {
@@ -20,7 +19,7 @@
 
         body {
             background: #0b0d17;
-            background-image: url('/images/bg2.jpg');
+            background-image: url("{{ asset('images/bg2.jpg') }}");
             background-attachment: scroll;
             background-size: auto;
             background-repeat: repeat;
@@ -48,8 +47,8 @@
                 radial-gradient(2px 2px at 40% 40%, #eee, rgba(255, 255, 255, 0));
             background-size: 200% 200%;
             background-repeat: repeat;
-            pointer-events: none;
-            z-index: 1;
+            pointer-events: none !important; /* Paksa klik menembus lapisan bintang */
+            z-index: 0; /* Turunkan tumpukan paling bawah di atas background gambar */
             opacity: 0.5;
             animation: twinkle 6s ease-in-out infinite;
         }
@@ -66,9 +65,16 @@
             }
         }
 
+        /* PERBAIKAN HEADER WRAPPER: Menjamin navigasi selalu berada di lapisan paling depan */
+        .header-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 9999 !important;
+        }
+
         main {
             position: relative;
-            z-index: 2;
+            z-index: 10; /* Berikan jarak aman dari z-index bintang */
         }
 
         .glass-card {
@@ -165,7 +171,9 @@
 </head>
 
 <body>
-    @include('partials.header')
+    <div class="header-wrapper">
+        @include('partials.header')
+    </div>
 
     <main class="container mx-auto px-4 py-8">
         @yield('content')

@@ -50,11 +50,11 @@
     </div>
     @endif
 
-    {{-- BACKGROUND GALAXY --}}
-    <div class="absolute inset-0">
-        <img src="{{ asset('images/bg2.jpg') }}" class="w-full h-full object-cover" alt="Background">
-    </div>
-    <div class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+    <img src="{{ asset('images/galaxy-bg2.png') }}"
+        class="absolute inset-0 w-full h-full object-cover opacity-70">
+
+    {{-- OVERLAY GELAP --}}
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
 
     {{-- AUTH CARD --}}
     <div class="relative z-10 w-full max-w-md p-10 mx-4 bg-white/10 backdrop-blur-2xl rounded-[3rem] border border-white/10 shadow-2xl">
@@ -162,6 +162,13 @@
                 btnReg.classList.add('text-blue-600');
             }
         }
+
+        // OTOMATIS AKTIFKAN TAB LOGIN SETELAH BERHASIL REGISTER
+        document.addEventListener("DOMContentLoaded", function() {
+            @if(session('register_success'))
+                toggleAuth('login');
+            @endif
+        });
     </script>
 </body>
 
