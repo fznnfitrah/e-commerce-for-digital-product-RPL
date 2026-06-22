@@ -5,7 +5,7 @@
                 <h1 class="text-2xl font-bold text-blue-400 hover:text-blue-300 transition-colors">J-Store</h1>
             </a>
             <div class="hidden md:flex gap-6 text-sm">
-                <a href="#" class="hover:text-blue-400">Top Up</a>
+                
                 
                 {{-- PERBAIKAN: Arahkan ke route 'user.riwayat' jika sudah login --}}
                 @auth

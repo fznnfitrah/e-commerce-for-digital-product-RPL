@@ -16,47 +16,99 @@
         </h2>
     </div>
 
-    {{-- GRID SELURUH BRAND --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-        @forelse($brands as $brand)
+    @php
+        $kategoriNameLower = strtolower($nama);
+        $isEbook = \Illuminate\Support\Str::contains($kategoriNameLower, ['book', 'e-book', 'ebook']);
+    @endphp
 
-        {{-- LOGIKA GAMBAR CADANGAN PINTAR --}}
+    {{-- KONDISI 1: JIKA KATEGORI E-BOOK (LANGSUNG LOOPING PRODUK NOVELNYA) --}}
+    @if($isEbook)
         @php
-        $fallbackImg = asset('images/placeholder.png'); // Bawaan
-
-        // Jika kategorinya game/topup, gunakan gambar dummy game yang berurutan
-        if (\Illuminate\Support\Str::contains(strtolower($nama), ['topup', 'game'])) {
-        $fallbackImg = asset('images/game/game top-up-' . $loop->iteration . '.png');
-        }
-        // Jika kategorinya ebook, gunakan placeholder ebook
-        elseif (\Illuminate\Support\Str::contains(strtolower($nama), ['book', 'e-book'])) {
-        $fallbackImg = asset('images/ebook-placeholder.png');
-        }
+            // Mengumpulkan semua produk dari semua brand yang ada di kategori E-book ini
+            $allEbooks = collect();
+            foreach($brands as $brand) {
+                $allEbooks = $allEbooks->merge($brand->produks);
+            }
         @endphp
 
-        {{-- Mengarahkan klik langsung ke detail produk/brand tersebut --}}
-        <a href="{{ route('produk.detail', $brand->id_brand) }}" class="group block">
-            <div class="rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1c23] to-[#0f1116] border border-blue-500/20 shadow-xl transition hover:-translate-y-2 hover:border-blue-400/60 float">
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            @forelse($allEbooks as $produk)
+                @php
+                    $produkNameLower = strtolower($produk->nama_produk);
+                    $localEbookImage = null;
 
-                <div class="relative aspect-square flex items-center justify-center p-6 bg-gradient-to-b from-blue-500/10 to-transparent">
-                    {{-- Terapkan variabel $fallbackImg di sini --}}
-                    <img src="{{ $brand->gambar_brand ? asset('storage/' . $brand->gambar_brand) : $fallbackImg }}"
-                        class="w-full h-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] transition duration-500 group-hover:scale-110"
-                        onerror="this.src='https://via.placeholder.com/150/1a1c23/3b82f6?text={{ urlencode($brand->nama_brand) }}'">
-                    {{-- (Tambahan onerror agar tidak pernah muncul ikon gambar pecah lagi) --}}
-                </div>
+                    if (\Illuminate\Support\Str::contains($produkNameLower, 'bintang')) $localEbookImage = 'images/e-book/bintang.jpg';
+                    elseif (\Illuminate\Support\Str::contains($produkNameLower, 'hujan')) $localEbookImage = 'images/e-book/hujan.jpg';
+                    elseif (\Illuminate\Support\Str::contains($produkNameLower, 'komet')) $localEbookImage = 'images/e-book/komet.jpg';
+                    elseif (\Illuminate\Support\Str::contains($produkNameLower, 'laut')) $localEbookImage = 'images/e-book/laut.jpg';
+                    elseif (\Illuminate\Support\Str::contains($produkNameLower, 'matahari')) $localEbookImage = 'images/e-book/matahari.jpg';
+                @endphp
 
-                <div class="px-4 py-5 text-center bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border-t border-blue-500/20">
-                    <p class="text-sm font-black text-white truncate uppercase tracking-wider group-hover:text-blue-300 transition">{{ $brand->nama_brand }}</p>
+                <a href="{{ route('produk.detail', ['id' => $produk->id_brand, 'selected' => $produk->id_produk]) }}" class="group block">
+                    <div class="rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/0 border border-blue-500/20 backdrop-blur-xl transition hover:-translate-y-2 hover:border-blue-400/60 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] float">
+                        <div class="relative h-56 flex items-center justify-center overflow-hidden rounded-t-2xl bg-gradient-to-b from-blue-500/10 to-black/40">
+                            
+                            @if($produk->gambar_produk)
+                                <img src="{{ asset('storage/' . $produk->gambar_produk) }}" class="max-h-[85%] object-contain transition duration-500 group-hover:scale-105 p-2 drop-shadow-[0_8px_8px_rgba(0,0,0,0.6)]">
+                            @elseif($localEbookImage)
+                                <img src="{{ asset($localEbookImage) }}" class="max-h-[85%] object-contain transition duration-500 group-hover:scale-105 p-2 drop-shadow-[0_8px_8px_rgba(0,0,0,0.6)]">
+                            @else
+                                <span class="text-5xl">📚</span>
+                            @endif
+
+                            <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                        </div>
+                        <div class="px-4 py-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 border-t border-blue-500/20 text-center">
+                            <p class="text-xs font-black truncate text-white uppercase group-hover:text-blue-300 transition-colors">{{ $produk->nama_produk }}</p>
+                            <p class="text-[10px] text-purple-400 font-bold mt-1 uppercase italic">Mulai Rp {{ number_format($produk->harga_produk, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+                </a>
+            @empty
+                <div class="col-span-full text-center py-16 bg-white/5 rounded-3xl border border-white/10">
+                    <p class="text-gray-400 italic">Belum ada koleksi E-Book.</p>
                 </div>
-            </div>
-        </a>
-        @empty
-        <div class="col-span-full text-center py-16 bg-white/5 rounded-3xl border border-white/10">
-            <p class="text-gray-400 italic">Belum ada brand/produk yang ditambahkan ke dalam kategori ini.</p>
+            @endforelse
         </div>
-        @endforelse
-    </div>
+
+    {{-- KONDISI 2: UNTUK KATEGORI LAINNYA (GAMES & APPS PREMIUM) --}}
+    @else
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            @forelse($brands as $brand)
+                @php
+                    $brandNameLower = strtolower($brand->nama_brand);
+                    $fallbackImg = asset('images/placeholder.png'); 
+
+                    if (\Illuminate\Support\Str::contains($kategoriNameLower, ['topup', 'game', 'top up'])) {
+                        $fallbackImg = asset('images/game/game top-up-' . $loop->iteration . '.png');
+                    } 
+                    elseif (\Illuminate\Support\Str::contains($kategoriNameLower, ['apps', 'aplikasi', 'premium'])) {
+                        if (\Illuminate\Support\Str::contains($brandNameLower, 'netflix')) $fallbackImg = asset('images/akunprem/netflix.png');
+                        elseif (\Illuminate\Support\Str::contains($brandNameLower, 'capcut')) $fallbackImg = asset('images/akunprem/capcut.jpg');
+                        elseif (\Illuminate\Support\Str::contains($brandNameLower, 'spotify')) $fallbackImg = asset('images/akunprem/spotify.png');
+                        elseif (\Illuminate\Support\Str::contains($brandNameLower, 'canva')) $fallbackImg = asset('images/akunprem/canva.png');
+                        elseif (\Illuminate\Support\Str::contains($brandNameLower, ['gisney', 'disney'])) $fallbackImg = asset('images/akunprem/disney.png');
+                    }
+                @endphp
+
+                <a href="{{ route('produk.detail', $brand->id_brand) }}" class="group block">
+                    <div class="rounded-3xl overflow-hidden bg-gradient-to-br from-[#1a1c23] to-[#0f1116] border border-blue-500/20 shadow-xl transition hover:-translate-y-2 hover:border-blue-400/60 float">
+                        <div class="relative aspect-square flex items-center justify-center p-6 bg-gradient-to-b from-blue-500/10 to-transparent">
+                            <img src="{{ $brand->gambar_brand ? asset('storage/' . $brand->gambar_brand) : $fallbackImg }}"
+                                class="w-full h-full object-contain drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] transition duration-500 group-hover:scale-110">
+                        </div>
+                        <div class="px-4 py-5 text-center bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-blue-500/10 border-t border-blue-500/20">
+                            <p class="text-sm font-black text-white truncate uppercase tracking-wider group-hover:text-blue-300 transition">{{ $brand->nama_brand }}</p>
+                        </div>
+                    </div>
+                </a>
+            @empty
+                <div class="col-span-full text-center py-16 bg-white/5 rounded-3xl border border-white/10">
+                    <p class="text-gray-400 italic">Belum ada produk yang tersedia di kategori ini.</p>
+                </div>
+            @endforelse
+        </div>
+    @endif
 
 </div>
 @endsection

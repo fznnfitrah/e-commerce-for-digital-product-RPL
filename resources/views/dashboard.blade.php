@@ -62,7 +62,7 @@
             <span class="w-2 h-8 bg-gradient-to-b from-blue-600 to-purple-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></span> 🎮 Topup Games Populer
         </h3>
         {{-- REFAKTOR: Gunakan nama_kategori dari database --}}
-        <a href="{{ route('kategori.all', $topupCategory ? $topupCategory->nama_kategori : 'Topup') }}" class="group text-sm font-bold text-blue-500 hover:text-blue-300 flex items-center gap-2 transition">
+        <a href="{{ route('kategori.all', $topupCategory ? $topupCategory->nama_kategori : 'Topup') }}" class="group text-sm font-bold text-purple-500 hover:text-purple-300 flex items-center gap-2 transition">
             LIHAT SEMUA
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -101,7 +101,6 @@
         <h3 class="text-2xl font-black italic uppercase text-white galaxy-title flex items-center gap-3">
             <span class="w-2 h-8 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.5)]"></span> 📱 Aplikasi Premium
         </h3>
-        {{-- REFAKTOR: Gunakan nama_kategori dari database --}}
         <a href="{{ route('kategori.all', $appsCategory ? $appsCategory->nama_kategori : 'Apps') }}" class="group text-sm font-bold text-purple-500 hover:text-purple-300 flex items-center gap-2 transition">
             LIHAT SEMUA
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,14 +112,42 @@
     <div class="grid grid-cols-2 md:grid-cols-5 gap-6 mb-16">
         @if($appBrands->count() > 0)
         @foreach($appBrands as $brand)
+        
+        {{-- LOGIKA MAPPING FILE ICON BERDASARKAN DATABASE --}}
+        @php
+            $brandNameLower = Str::lower($brand->nama_brand);
+            
+            // Mapping default jika gambar dari panel admin kosong
+            if (Str::contains($brandNameLower, 'netflix')) {
+                $localImage = 'images/akunprem/netflix.png';
+            } elseif (Str::contains($brandNameLower, 'capcut')) {
+                $localImage = 'images/akunprem/capcut.jpg';
+            } elseif (Str::contains($brandNameLower, 'spotify')) {
+                $localImage = 'images/akunprem/spotify.png';
+            } elseif (Str::contains($brandNameLower, 'canva')) {
+                $localImage = 'images/akunprem/canva.png';
+            } elseif (Str::contains($brandNameLower, 'gisney') || Str::contains($brandNameLower, 'disney')) {
+                $localImage = 'images/akunprem/disney.png';
+            } else {
+                $localImage = null;
+            }
+        @endphp
+
         <a href="{{ route('produk.detail', $brand->id_brand) }}" class="group block">
             <div class="bg-gradient-to-br from-[#1a1c23] to-[#0f1116] border border-purple-500/20 rounded-3xl p-6 text-center hover:border-purple-400/60 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] transition shadow-xl float group">
                 <div class="aspect-square bg-gradient-to-br from-purple-500/20 to-black/40 rounded-2xl mb-4 flex items-center justify-center overflow-hidden p-4 shadow-inner">
+                    
                     @if($brand->gambar_brand)
-                    <img src="{{ asset('storage/' . $brand->gambar_brand) }}" class="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-110 drop-shadow-[0_8px_8px_rgba(0,0,0,0.5)]">
+                        {{-- Jika ada gambar dari upload admin di database --}}
+                        <img src="{{ asset('storage/' . $brand->gambar_brand) }}" class="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-110 drop-shadow-[0_8px_8px_rgba(0,0,0,0.5)]">
+                    @elseif($localImage)
+                        {{-- PERBAIKAN UTAMA: Mengambil aset lokal dari folder public/images/akunprem/ --}}
+                        <img src="{{ asset($localImage) }}" class="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-110 drop-shadow-[0_8px_8px_rgba(0,0,0,0.5)]">
                     @else
-                    <span class="text-4xl group-hover:scale-110 transition duration-500">📱</span>
+                        {{-- Fallback jika file tidak ditemukan sama sekali --}}
+                        <span class="text-4xl group-hover:scale-110 transition duration-500">📱</span>
                     @endif
+
                 </div>
                 <p class="text-sm font-black text-white uppercase tracking-wider truncate group-hover:text-purple-300 transition">{{ $brand->nama_brand }}</p>
                 <p class="text-xs text-purple-400 mt-2 font-bold italic">Mulai Rp {{ number_format($brand->produks->min('harga_produk') ?? 0, 0, ',', '.') }}</p>
@@ -128,15 +155,15 @@
         </a>
         @endforeach
         @else
-        <p class="text-gray-500 col-span-full italic text-sm">Belum ada koleksi Aplikasi Premium.</p>
+        <p class="text-gray-500 col-span-full italic text-sm">Belum ada data aplikasi premium.</p>
         @endif
     </div>
 
     {{-- E-BOOK TERLARIS SECTION --}}
     @php
     $ebookCategory = $kategoris->filter(function($kategori) {
-    $nama = Str::lower($kategori->nama_kategori);
-    return Str::contains($nama, 'book') || Str::contains($nama, 'ebook');
+        $nama = Str::lower($kategori->nama_kategori);
+        return Str::contains($nama, 'book') || Str::contains($nama, 'ebook');
     })->first();
 
     $ebookBrand = $ebookCategory ? $ebookCategory->brands->first() : null;
@@ -147,8 +174,9 @@
         <h3 class="text-2xl font-black italic uppercase text-white galaxy-title flex items-center gap-3">
             <span class="w-2 h-8 bg-gradient-to-b from-cyan-500 to-blue-600 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"></span> 📚 E-Book Terlaris
         </h3>
-        <a href="{{ route('kategori.all', $ebookCategory ? $ebookCategory->nama_kategori : 'E-Book') }}" class="group text-sm font-semibold text-blue-500 hover:text-blue-300 flex items-center gap-1 transition">
-            Lihat Semua
+        
+        <a href="{{ route('kategori.all', $ebookCategory ? $ebookCategory->nama_kategori : 'E-Book') }}" class="group text-sm font-bold text-purple-500 hover:text-purple-300 flex items-center gap-2 transition">
+            LIHAT SEMUA
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -159,13 +187,40 @@
         @if($ebooks->count() > 0)
         @foreach($ebooks as $produk)
 
-        {{-- REFAKTOR: Ubah rute menjadi rute khusus Direct Checkout Ebook --}}
-        <a href="{{ route('produk.detail', ['id' => $ebookBrand->id_brand, 'selected' => $produk->id_produk]) }}" class="group block">
+        {{-- LOGIKA MAPPING COVER EBOOK BERDASARKAN NAMA PRODUK --}}
+        @php
+            $produkNameLower = Str::lower($produk->nama_produk);
+            
+            if (Str::contains($produkNameLower, 'bintang')) {
+                $localEbookImage = 'images/e-book/bintang.jpg';
+            } elseif (Str::contains($produkNameLower, 'hujan')) {
+                $localEbookImage = 'images/e-book/hujan.jpg';
+            } elseif (Str::contains($produkNameLower, 'komet')) {
+                $localEbookImage = 'images/e-book/komet.jpg';
+            } elseif (Str::contains($produkNameLower, 'laut')) {
+                $localEbookImage = 'images/e-book/laut.jpg';
+            } elseif (Str::contains($produkNameLower, 'matahari')) {
+                $localEbookImage = 'images/e-book/matahari.jpg';
+            } else {
+                $localEbookImage = null;
+            }
+        @endphp
 
+        <a href="{{ route('produk.detail', ['id' => $ebookBrand->id_brand, 'selected' => $produk->id_produk]) }}" class="group block">
             <div class="rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/0 border border-blue-500/20 backdrop-blur-xl transition hover:-translate-y-2 hover:border-blue-400/60 hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] float">
                 <div class="relative h-44 flex items-center justify-center overflow-hidden rounded-t-2xl bg-gradient-to-b from-blue-500/10 to-black/40">
-                    <img src="{{ $produk->gambar_produk ? asset('storage/' . $produk->gambar_produk) : asset('images/ebook-placeholder.png') }}"
-                        class="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-105 p-2">
+                    
+                    @if($produk->gambar_produk)
+                        {{-- Jika ada gambar dari upload admin --}}
+                        <img src="{{ asset('storage/' . $produk->gambar_produk) }}" class="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-105 p-2 drop-shadow-[0_8px_8px_rgba(0,0,0,0.6)]">
+                    @elseif($localEbookImage)
+                        {{-- PERBAIKAN: Mengambil cover lokal dari folder public/images/e-book/ --}}
+                        <img src="{{ asset($localEbookImage) }}" class="max-h-full max-w-full object-contain transition duration-500 group-hover:scale-105 p-2 drop-shadow-[0_8px_8px_rgba(0,0,0,0.6)]">
+                    @else
+                        {{-- Fallback placeholder jika tidak ada gambar sama sekali --}}
+                        <img src="{{ asset('images/ebook-placeholder.png') }}" class="max-h-full max-w-full object-contain p-2">
+                    @endif
+
                     <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                 </div>
                 <div class="px-4 py-3 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 border-t border-blue-500/20">
