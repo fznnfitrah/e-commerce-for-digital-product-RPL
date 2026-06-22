@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>J-Store - Produk Digital Tercepat</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
@@ -36,15 +37,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 20% 30%, #eee, rgba(255,255,255,0)),
-                radial-gradient(2px 2px at 60% 70%, #fff, rgba(255,255,255,0)),
-                radial-gradient(1px 1px at 50% 50%, #ddd, rgba(255,255,255,0)),
-                radial-gradient(1px 1px at 80% 10%, #fff, rgba(255,255,255,0)),
-                radial-gradient(2px 2px at 90% 60%, #eee, rgba(255,255,255,0)),
-                radial-gradient(1px 1px at 30% 80%, #fff, rgba(255,255,255,0)),
-                radial-gradient(1px 1px at 10% 90%, #ddd, rgba(255,255,255,0)),
-                radial-gradient(2px 2px at 40% 40%, #eee, rgba(255,255,255,0));
+            background-image:
+                radial-gradient(2px 2px at 20% 30%, #eee, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 60% 70%, #fff, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 50% 50%, #ddd, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 80% 10%, #fff, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 90% 60%, #eee, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 30% 80%, #fff, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 10% 90%, #ddd, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 40% 40%, #eee, rgba(255, 255, 255, 0));
             background-size: 200% 200%;
             background-repeat: repeat;
             pointer-events: none;
@@ -54,8 +55,15 @@
         }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
         }
 
         main {
@@ -92,15 +100,24 @@
         }
 
         @keyframes pulseGlow {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.05); }
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.05);
+            }
         }
 
         /* Neon border effect */
         .neon-border {
             border: 2px solid transparent;
-            background: linear-gradient(rgba(255,255,255,0.05), rgba(255,255,255,0.05)) padding-box,
-                        linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899) border-box;
+            background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)) padding-box,
+                linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899) border-box;
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3), inset 0 0 15px rgba(59, 130, 246, 0.1);
         }
 
@@ -115,11 +132,18 @@
         }
 
         @keyframes galaxyShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
         }
 
-       
+
         /* Scroll glow indicator */
         .scroll-glow {
             position: relative;

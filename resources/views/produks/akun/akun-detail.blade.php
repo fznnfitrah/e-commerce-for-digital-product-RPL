@@ -139,7 +139,7 @@
 
                         <label class="cursor-pointer">
 
-                            <input type="radio" name="id_produk" value="{{ $produk->id_produk }}" class="hidden peer id-produk-radio" data-name="{{ $produk->nama_produk }}" data-price="{{ number_format($produk->harga_produk, 0, ',', '.') }}">
+                            <input type="radio" name="id_produk" value="{{ $produk->id_produk }}" class="hidden peer id-produk-radio" data-name="{{ $produk->nama_produk }}" data-price="{{ number_format($produk->harga_produk, 0, ',', '.') }}" data-raw-price="{{ $produk->harga_produk }}">
 
                             <div class="border border-white/10 bg-black/20 rounded-2xl p-5 transition hover:border-purple-500/50 peer-checked:border-purple-500 peer-checked:bg-purple-500/10">
                                 <div class="flex items-start justify-between gap-4">
@@ -245,38 +245,34 @@
                         <div class="w-10 h-10 rounded-2xl bg-orange-600 flex items-center justify-center font-black text-white">
                             4
                         </div>
-
                         <div>
-                            <h3 class="text-lg font-black text-white">
-                                Detail Pesanan
-                            </h3>
-
-                            <p class="text-sm text-gray-400">
-                                Ringkasan transaksi Anda
-                            </p>
+                            <h3 class="text-lg font-black text-white">Detail Pesanan</h3>
+                            <p class="text-sm text-gray-400">Ringkasan transaksi Anda</p>
                         </div>
                     </div>
 
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    {{-- AREA PROMO YANG SUDAH DIRAPIKAN --}}
+                    <div class="mb-6 bg-black/20 p-5 rounded-2xl border border-white/5">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Punya Kode Promo?</label>
+                        <div class="flex gap-3">
+                            <input type="hidden" name="kode_promo" id="hidden_kode_promo" value="">
+                            <input type="text" id="input_kode_promo" class="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-white uppercase placeholder:text-gray-500 focus:ring-2 focus:ring-purple-500 outline-none transition" placeholder="MASUKKAN KODE...">
+                            <button type="button" id="btn_terapkan_promo" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-bold transition-colors">Terapkan</button>
+                        </div>
+                        <p id="pesan_promo" class="text-xs mt-2 hidden"></p>
+                    </div>
 
+                    {{-- AREA TOTAL HARGA FINAL --}}
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-t border-white/10 pt-6">
                         <div>
-
-                            <p id="selected-product"
-                                class="text-sm text-gray-400">
-                                Belum memilih paket
-                            </p>
-
-                            <h2 id="selected-price"
-                                class="text-4xl font-black text-white mt-2">
-                                Rp 0
-                            </h2>
-
+                            <p id="selected-product" class="text-sm text-gray-400">Belum memilih paket</p>
+                            <p id="tampil_diskon" class="text-sm text-green-400 font-semibold hidden mt-1"></p>
+                            <h2 id="selected-price" class="text-4xl font-black text-white mt-1">Rp 0</h2>
                         </div>
 
                         <button type="submit" id="submit_button" disabled class="px-10 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black uppercase tracking-wide shadow-xl shadow-purple-500/20 transition active:scale-95">
                             Beli Sekarang
                         </button>
-
                     </div>
                 </div>
 
@@ -287,27 +283,113 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-
+        // Deklarasi Elemen
         const radios = document.querySelectorAll('.id-produk-radio');
-
         const selectedProduct = document.getElementById('selected-product');
-
         const selectedPrice = document.getElementById('selected-price');
-
         const submitButton = document.getElementById('submit_button');
 
+        const btnPromo = document.getElementById('btn_terapkan_promo');
+        const inputPromo = document.getElementById('input_kode_promo');
+        const hiddenPromo = document.getElementById('hidden_kode_promo');
+        const pesanPromo = document.getElementById('pesan_promo');
+        const tampilDiskon = document.getElementById('tampil_diskon');
+
+        // State Variabel
+        let currentSelectedPrice = 0;
+        let currentDiscount = 0;
+
+        // 1. Logika Pemilihan Paket
         radios.forEach(radio => {
-
             radio.addEventListener('change', function() {
-
                 selectedProduct.textContent = this.dataset.name;
+                currentSelectedPrice = parseInt(this.dataset.rawPrice); // Ambil angka murni
 
-                selectedPrice.textContent = 'Rp ' + this.dataset.price;
+                // Jika user mengganti paket saat promo aktif, reset promo agar aman (validasi min_belanja)
+                if (hiddenPromo.value !== '') {
+                    inputPromo.value = '';
+                    tampilkanPesan('Paket diubah. Silakan terapkan ulang kode promo.', 'yellow');
+                    resetPromoUI();
+                } else {
+                    updatePriceDisplay();
+                }
 
                 submitButton.disabled = false;
             });
         });
 
+        // 2. Logika Pengecekan Promo via AJAX
+        btnPromo.addEventListener('click', async function() {
+            const kode = inputPromo.value.trim().toUpperCase();
+
+            if (!kode) {
+                tampilkanPesan('Silakan masukkan kode promo.', 'red');
+                return;
+            }
+
+            if (currentSelectedPrice === 0) {
+                tampilkanPesan('Silakan pilih paket produk di Step 2 terlebih dahulu.', 'red');
+                return;
+            }
+
+            btnPromo.textContent = '...';
+            btnPromo.disabled = true;
+
+            try {
+                const response = await fetch("{{ route('transaksi.cek-promo') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        kode_promo: kode,
+                        total_pembelian: currentSelectedPrice
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    tampilkanPesan(result.message, 'green');
+                    hiddenPromo.value = kode;
+                    currentDiscount = result.potongan_harga;
+
+                    tampilDiskon.textContent = '- Diskon: Rp ' + new Intl.NumberFormat('id-ID').format(currentDiscount);
+                    tampilDiskon.classList.remove('hidden');
+
+                    updatePriceDisplay();
+                } else {
+                    tampilkanPesan(result.message, 'red');
+                    resetPromoUI();
+                }
+            } catch (error) {
+                tampilkanPesan('Terjadi kesalahan jaringan atau server.', 'red');
+                resetPromoUI();
+            } finally {
+                btnPromo.textContent = 'Terapkan';
+                btnPromo.disabled = false;
+            }
+        });
+
+        // 3. Fungsi Bantuan
+        function tampilkanPesan(text, color) {
+            pesanPromo.textContent = text;
+            pesanPromo.className = `text-xs mt-2 text-${color}-400 font-medium`;
+            pesanPromo.classList.remove('hidden');
+        }
+
+        function resetPromoUI() {
+            hiddenPromo.value = '';
+            currentDiscount = 0;
+            tampilDiskon.classList.add('hidden');
+            updatePriceDisplay();
+        }
+
+        function updatePriceDisplay() {
+            const totalAkhir = Math.max(0, currentSelectedPrice - currentDiscount);
+            selectedPrice.textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(totalAkhir);
+        }
     });
 </script>
 @endsection

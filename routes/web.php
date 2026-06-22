@@ -36,6 +36,8 @@ Route::get('/search', [HomeController::class, 'search'])->name('produk.search');
 // Route untuk memproses form order dari halaman detail produk
 Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout'])->name('transaksi.checkout');
 
+Route::post('/transaksi/cek-promo', [TransaksiController::class, 'cekPromo'])->name('transaksi.cek-promo');
+
 // Route untuk menampilkan halaman invoice beserta pop-up Midtrans
 Route::get('/transaksi/pembayaran/{id_transaksi}', [TransaksiController::class, 'pembayaran'])->name('transaksi.pembayaran');
 
