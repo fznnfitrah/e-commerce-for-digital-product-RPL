@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaksi;
 use App\Models\Produk;
+use App\Models\Promo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -23,16 +24,44 @@ class TransaksiController extends Controller
         Config::$is3ds = config('midtrans.is_3ds');
     }
 
+    public function cekPromo(Request $request)
+    {
+        $request->validate([
+            'kode_promo' => 'required|string',
+            'total_pembelian' => 'required|numeric'
+        ]);
+
+        $promo = Promo::where('kode_promo', $request->kode_promo)->first();
+
+        if (!$promo) {
+            return response()->json(['status' => 'error', 'message' => 'Kode promo tidak valid atau tidak ditemukan.']);
+        }
+
+        if ($promo->batasan_user <= 0) {
+            return response()->json(['status' => 'error', 'message' => 'Mohon maaf, kuota promo ini sudah habis.']);
+        }
+
+        if ($request->total_pembelian < $promo->transaksi_min) {
+            return response()->json(['status' => 'error', 'message' => 'Minimal belanja untuk promo ini adalah Rp ' . number_format($promo->transaksi_min, 0, ',', '.')]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Promo berhasil digunakan!',
+            'potongan_harga' => $promo->potongan_harga,
+            'id_promo' => $promo->id_promo
+        ]);
+    }
+
     public function checkout(Request $request)
     {
         // 1. VALIDASI INPUT
-        // id_target bertindak sebagai Email untuk E-book, dan ID Game untuk Topup
-        // kontak_pelanggan bertindak sebagai No WA (opsional)
         $request->validate([
             'id_produk'         => 'required|exists:produks,id_produk',
             'id_target'         => 'required|string|min:3',
             'kontak_pelanggan'  => 'nullable|string',
-            'metode_pembayaran' => 'required|string'
+            'metode_pembayaran' => 'required|string',
+            'kode_promo'        => 'nullable|string' // TAMBAHAN: Validasi input hidden kode promo
         ], [
             'id_target.required'         => 'Email / ID Target wajib diisi.',
             'metode_pembayaran.required' => 'Silakan pilih metode pembayaran terlebih dahulu.'
@@ -40,8 +69,10 @@ class TransaksiController extends Controller
 
         $produk = Produk::findOrFail($request->id_produk);
 
+        // Tentukan harga dasar
+        $hargaDasar = $produk->harga_jual ?? $produk->harga_produk;
+
         // 2. CEK STOK (HANYA UNTUK TIPE AKUN)
-        // REFAKTOR: Menghapus 3 query berulang menjadi 1 eksekusi yang efisien
         $contohAset = AsetProduk::where('id_produk', $produk->id_produk)->first();
         $isAkun = $contohAset && Str::contains(strtolower($contohAset->nama_aset), 'akun');
 
@@ -57,21 +88,45 @@ class TransaksiController extends Controller
             }
         }
 
-        // 3. SIMPAN KE DATABASE
+        // 3. LOGIKA KALKULASI PROMO & DISKON
+        $diskon = 0;
+        $idPromo = null;
+
+        if ($request->filled('kode_promo')) {
+            // Cari promo berdasarkan kode
+            $promo = Promo::where('kode_promo', $request->kode_promo)->first();
+
+            // Validasi ulang di backend: Promo ada, kuota masih, dan memenuhi min belanja
+            if ($promo && $promo->batasan_user > 0 && $hargaDasar >= $promo->transaksi_min) {
+                $diskon = $promo->potongan_harga;
+                $idPromo = $promo->id_promo;
+
+                // Kurangi kuota user (batasan_user) di database agar tidak over-claim
+                $promo->decrement('batasan_user');
+            }
+        }
+
+        // Kalkulasi total akhir (Pastikan tidak minus jika diskon lebih besar dari harga)
+        $totalAkhir = max(0, $hargaDasar - $diskon);
+
+        // 4. SIMPAN KE DATABASE
         $transaksi = Transaksi::create([
             'id_users'          => auth()->id() ?? null,
             'id_produk'         => $produk->id_produk,
-            'kontak_pelanggan'  => $request->kontak_pelanggan ?? '-', // WA opsional aman tersimpan
-            'id_target'         => $request->id_target,               // Email E-book aman tersimpan
+            'id_promo'          => $idPromo,          // Menyimpan ID Promo yang dipakai
+            'kontak_pelanggan'  => $request->kontak_pelanggan ?? '-',
+            'id_target'         => $request->id_target,
             'id_server'         => $request->id_server ?? null,
-            'total_pembelian'   => $produk->harga_jual ?? $produk->harga_produk,
-            'total_akhir'       => $produk->harga_jual ?? $produk->harga_produk,
+            'total_pembelian'   => $hargaDasar,       // Harga murni produk (Misal: 100.000)
+            'diskon_pembelian'  => $diskon,           // Nominal potongan (Misal: 10.000)
+            'total_akhir'       => $totalAkhir,       // Harga bersih (Misal: 90.000) -> Ini yang dibaca Midtrans
             'metode_pembayaran' => $request->metode_pembayaran,
             'status_pembayaran' => 'pending',
         ]);
 
         return redirect()->route('transaksi.pembayaran', $transaksi->id_transaksi);
     }
+
 
     public function pembayaran($id_transaksi)
     {

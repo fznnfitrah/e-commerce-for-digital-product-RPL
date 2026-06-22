@@ -34,6 +34,51 @@ class HomeController extends Controller
         return view('dashboard', compact('kategoris', 'produkByKategori', 'ulasanPilihan'));
     }
 
+    public function search(Request $request)
+    {
+        $keyword = $request->query('q');
+
+        if (empty($keyword)) {
+            return back();
+        }
+
+        // --- LOGIKA DETEKSI PULSA ---
+        // Daftar kata kunci yang memicu munculnya Gateway Pulsa
+        $pulsaKeywords = ['pulsa', 'telkomsel', 'indosat', 'xl', 'axis', 'tri', 'smartfren', 'tsel', 'isat'];
+        $isPulsaSearch = false;
+
+        foreach ($pulsaKeywords as $pk) {
+            if (stripos($keyword, $pk) !== false) {
+                $isPulsaSearch = true;
+                break;
+            }
+        }
+
+        $pulsaGateBrand = null;
+        if ($isPulsaSearch) {
+            // Ambil salah satu brand pulsa (kategori 9) sebagai 'jangkar' untuk route produk.detail
+            $pulsaGateBrand = Brand::where('id_kategori', 9)->first();
+        }
+        // ----------------------------
+
+        // 1. Cari Brand (Kecuali kategori 9 / pulsa agar tidak dobel dengan Gateway)
+        $brands = Brand::with('produks')
+            ->where('nama_brand', 'LIKE', "%{$keyword}%")
+            ->where('id_kategori', '!=', 9)
+            ->get();
+
+        // 2. Cari Produk Spesifik (Misal: E-book atau Item Game)
+        $produks = Produk::with('brand')
+            ->where('nama_produk', 'LIKE', "%{$keyword}%")
+            ->get();
+
+        return view('search-results', [
+            'brands' => $brands,
+            'produks' => $produks,
+            'pulsaGateBrand' => $pulsaGateBrand, // Lempar variabel pulsa ke view
+            'keyword' => $keyword
+        ]);
+    }
     public function detail($id_brand)
     {
         $brand = Brand::with(['produks', 'kategori'])->findOrFail($id_brand);
