@@ -6,45 +6,52 @@
             </a>
             <div class="hidden md:flex gap-6 text-sm">
                 <a href="#" class="hover:text-blue-400">Top Up</a>
-                
+
                 {{-- PERBAIKAN: Arahkan ke route 'user.riwayat' jika sudah login --}}
                 @auth
-                    <a href="{{ route('user.riwayat') }}" class="hover:text-blue-400">Riwayat Pembelian</a>
+                <a href="{{ route('user.riwayat') }}" class="hover:text-blue-400">Riwayat Pembelian</a>
                 @else
-                    <a href="{{ route('login') }}" class="hover:text-blue-400">Riwayat Pembelian</a>
+                <a href="{{ route('login') }}" class="hover:text-blue-400">Riwayat Pembelian</a>
                 @endauth
             </div>
         </div>
-        
+
         <div class="flex-1 max-w-md w-full">
-            <input type="text" placeholder="Cari produk..." class="w-full bg-gray-800 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+            <form action="{{ route('produk.search') }}" method="GET" class="relative m-0">
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari game, e-book, atau brand..." class="w-full bg-gray-800 border-none rounded-lg pl-4 pr-10 py-2 focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 transition-shadow" autocomplete="off">
+                <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+            </form>
         </div>
 
         <div class="flex items-center gap-6">
             @guest
-                <a href="{{ route('login') }}" class="bg-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">Masuk</a>
+            <a href="{{ route('login') }}" class="bg-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">Masuk</a>
             @else
-                <div class="flex items-center gap-4">
-                    <div class="flex flex-col items-end leading-tight">
-                        <span class="text-blue-400 font-bold text-sm">Halo, {{ auth()->user()->name }}</span>
-                        
-                        @if(auth()->user()->role === 'admin')
-                            <a href="{{ route('admin.dashboard') }}" class="text-[10px] text-yellow-500 hover:text-yellow-400 font-bold uppercase tracking-tighter transition-colors">
-                                Ke Panel Admin
-                            </a>
-                        @endif
-                    </div>
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col items-end leading-tight">
+                    <span class="text-blue-400 font-bold text-sm">Halo, {{ auth()->user()->name }}</span>
 
-                    <div class="h-8 w-[1px] bg-white/10"></div>
-
-                    <form action="{{ route('logout') }}" method="POST" class="m-0">
-                        @csrf
-                        <button type="submit" class="text-sm font-medium text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2 group">
-                            <span>Keluar</span>
-                            <span class="group-hover:translate-x-1 transition-transform">→</span>
-                        </button>
-                    </form>
+                    @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.dashboard') }}" class="text-[10px] text-yellow-500 hover:text-yellow-400 font-bold uppercase tracking-tighter transition-colors">
+                        Ke Panel Admin
+                    </a>
+                    @endif
                 </div>
+
+                <div class="h-8 w-[1px] bg-white/10"></div>
+
+                <form action="{{ route('logout') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="text-sm font-medium text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2 group">
+                        <span>Keluar</span>
+                        <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    </button>
+                </form>
+            </div>
             @endguest
         </div>
     </div>
