@@ -28,11 +28,15 @@ Route::get('/produk-detail/{id}', [HomeController::class, 'detail'])->name('prod
 
 Route::get('/checkout-ebook/{id_produk}', [HomeController::class, 'checkoutEbook'])->name('checkout.ebook');
 
-// Hapus atau ganti rute yang lama dengan ini:
+
 Route::get('/kategori/{nama}', [HomeController::class, 'kategoriAll'])->name('kategori.all');
+
+Route::get('/search', [HomeController::class, 'search'])->name('produk.search');
 
 // Route untuk memproses form order dari halaman detail produk
 Route::post('/transaksi/checkout', [TransaksiController::class, 'checkout'])->name('transaksi.checkout');
+
+Route::post('/transaksi/cek-promo', [TransaksiController::class, 'cekPromo'])->name('transaksi.cek-promo');
 
 // Route untuk menampilkan halaman invoice beserta pop-up Midtrans
 Route::get('/transaksi/pembayaran/{id_transaksi}', [TransaksiController::class, 'pembayaran'])->name('transaksi.pembayaran');
