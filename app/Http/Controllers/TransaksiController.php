@@ -159,7 +159,8 @@ class TransaksiController extends Controller
                 'enabled_payments' => [$transaksi->metode_pembayaran],
             ];
 
-            \Midtrans\Config::$overrideNotifUrl = 'https://frequency-deferral-deviant.ngrok-free.dev/api/midtrans/callback';
+            \Midtrans\Config::$overrideNotifUrl = 'https://lecturer-diffuser-algorithm.ngrok-free.dev/api/midtrans/callback';
+            // \Midtrans\Config::$overrideNotifUrl = 'https://tsxcb-103-82-164-109.free.pinggy.net/api/midtrans/callback';
 
             try {
                 $snapToken = Snap::getSnapToken($params);

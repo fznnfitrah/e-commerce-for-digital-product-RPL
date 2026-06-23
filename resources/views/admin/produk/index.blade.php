@@ -9,7 +9,7 @@
     {{-- Search & Filter Simple --}}
     <div class="relative w-72">
         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">🔍</span>
-        <input type="text" placeholder="Cari nama produk..."
+        <input type="text" id="searchInput" placeholder="Cari nama produk..."
             class="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all">
     </div>
 

@@ -96,14 +96,14 @@
                         {{-- WHATSAPP (KONTAK PELANGGAN) --}}
                         <div>
                             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-2">
-                                WhatsApp (Kontak Pelanggan)
+                                Email (Kontak Pelanggan)
                             </label>
                             <input
-                                type="text"
+                                type="email"
                                 name="kontak_pelanggan"
                                 value="{{ old('kontak_pelanggan') }}"
                                 autocomplete="off"
-                                placeholder="08xxxxxxxxxx"
+                                placeholder="user@gmail.com"
                                 class="w-full bg-black/30 border @error('kontak_pelanggan') border-red-500 @else border-white/10 @enderror rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-yellow-500 outline-none transition">
                             @error('kontak_pelanggan')
                             <p class="text-red-500 text-sm mt-2 font-semibold">{{ $message }}</p>

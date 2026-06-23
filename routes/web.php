@@ -103,7 +103,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/{id}/edit', [ProdukController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ProdukController::class, 'update'])->name('update');
         Route::delete('/{id}', [ProdukController::class, 'destroy'])->name('destroy');
+
+        Route::post('/{id}/aset/bulk', [ProdukController::class, 'storeBulkAset'])->name('aset.bulk');
     });
+
+    Route::delete('/aset/{id}', [ProdukController::class, 'destroyAset'])->name('aset.destroy');
 
     // Pengelolaan Kategori -> /admin/kategori/...
     Route::prefix('kategori')->name('kategori.')->group(function () {

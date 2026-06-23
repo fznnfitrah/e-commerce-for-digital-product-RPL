@@ -131,6 +131,51 @@ class ProdukController extends Controller
 
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil diperbarui!');
     }
+    // Pastikan Anda sudah mengimport model AsetProduk di atas
+    // use App\Models\AsetProduk;
+
+    public function storeBulkAset(Request $request, $idProduk)
+    {
+        $request->validate([
+            'data_akun' => 'required|string',
+        ]);
+
+        $produk = Produk::findOrFail($idProduk);
+
+        // Pecah berdasarkan enter (baris baru)
+        $listAkun = explode("\n", $request->data_akun);
+        $jumlahBerhasil = 0;
+
+        foreach ($listAkun as $item) {
+            $item = trim($item);
+            if (!empty($item)) {
+                AsetProduk::create([
+                    'id_produk' => $produk->id_produk,
+                    'nama_aset' => 'Akun Premium', // Default nama untuk tipe akun
+                    'deskripsi' => $item,          // email:password disimpan di sini
+                    'link_file' => null,
+                    'is_sold'   => false           // Default 0
+                ]);
+                $jumlahBerhasil++;
+            }
+        }
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => "$jumlahBerhasil aset berhasil ditambahkan ke dalam stok."
+        ]);
+    }
+
+    public function destroyAset($idAset)
+    {
+        $aset = AsetProduk::findOrFail($idAset);
+        $aset->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Aset berhasil dihapus.'
+        ]);
+    }
 
     public function destroy($id)
     {

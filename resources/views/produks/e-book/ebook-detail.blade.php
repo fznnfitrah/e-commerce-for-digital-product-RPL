@@ -3,152 +3,133 @@
 @section('content')
 <div class="container mx-auto px-4 py-8 md:px-16 max-w-5xl">
 
-    {{-- LOGIKA PINTAR: Cari produk yang ID-nya sama dengan parameter '?selected=' di URL --}}
     @php
-        $selectedProduct = $items->firstWhere('id_produk', request('selected')) ?? $items->first();
+    $selectedProduct = $items->firstWhere('id_produk', request('selected')) ?? $items->first();
     @endphp
 
     <form action="{{ route('transaksi.checkout') }}" method="POST" id="form-ebook">
         @csrf
 
-        {{-- KUNCI UTAMA: Input hidden agar sistem tahu buku apa yang sedang dibeli --}}
         <input type="hidden" name="id_produk" value="{{ $selectedProduct->id_produk }}">
 
-        {{-- BANNER DINAMIS --}}
-        <div class="relative w-full h-48 md:h-64 rounded-4xl overflow-hidden border border-white/10 mb-8 shadow-2xl">
+        {{-- BANNER --}}
+        <div class="relative w-full h-48 md:h-64 rounded-3xl overflow-hidden border border-white/10 mb-8 shadow-2xl">
             <img src="{{ $selectedProduct->gambar_produk ? asset('storage/' . $selectedProduct->gambar_produk) : asset('images/default-banner.png') }}" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
             <div class="absolute bottom-6 left-8">
-                <p class="text-blue-400 font-bold uppercase tracking-widest text-sm mb-1">E-Book Digital</p>
-                <h2 class="text-3xl font-black text-white uppercase italic tracking-tighter">{{ $selectedProduct->nama_produk }}</h2>
+                <p class="text-blue-400 font-bold uppercase tracking-widest text-xs mb-1">E-BOOK DIGITAL</p>
+                <h2 class="text-3xl font-black text-white uppercase italic">{{ $selectedProduct->nama_produk }}</h2>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-8">
+        <div class="space-y-6">
 
-            {{-- STEP 1: INFORMASI PENGIRIMAN --}}
-            <div class="bg-white/10 backdrop-blur-md rounded-4xl border border-white/10 p-6 shadow-xl">
-                <h3 class="flex items-center gap-3 font-bold mb-4 text-white">
-                    <span class="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-sm text-white">1</span>
+            {{-- STEP 1 --}}
+            <section class="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-xl">
+                <h3 class="flex items-center gap-3 text-white font-bold mb-5">
+                    <span class="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center">1</span>
                     Informasi Pengiriman
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">Alamat Email Aktif (Wajib)</label>
-                        <input type="email" name="id_target" value="{{ old('id_target') }}" required placeholder="Contoh: user@email.com"
-                            class="w-full bg-black/40 border @error('id_target') border-red-500 @else border-white/10 @enderror rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase font-bold ml-1">Email Aktif (Wajib)</label>
+                        <input type="email" name="id_target" value="{{ old('id_target') }}" placeholder="user@email.com" required class="w-full mt-2 bg-black/40 border @error('id_target') border-red-500 @else border-white/10 @enderror rounded-xl px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500">
                         @error('id_target')
-                            <p class="text-red-500 text-xs font-semibold ml-1">{{ $message }}</p>
+                        <p class="text-red-400 text-xs mt-2">{{ $message }}</p>
                         @else
-                            <p class="text-[10px] text-gray-400 italic ml-1">* File E-book akan dikirimkan ke email ini</p>
+                        <p class="text-[10px] text-gray-500 mt-2">File ebook akan dikirim melalui email.</p>
                         @enderror
                     </div>
 
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">Nomor WhatsApp (Opsional)</label>
-                        <input type="number" name="kontak_pelanggan" value="{{ old('kontak_pelanggan') }}" placeholder="Contoh: 0812xxxx"
-                            class="w-full bg-black/40 border @error('kontak_pelanggan') border-red-500 @else border-white/10 @enderror rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <div>
+                        <label class="text-[10px] text-gray-400 uppercase font-bold ml-1">Nomor WhatsApp (Opsional)</label>
+                        <input type="number" name="kontak_pelanggan" value="{{ old('kontak_pelanggan') }}" placeholder="0812xxxx" class="w-full mt-2 bg-black/40 border @error('kontak_pelanggan') border-red-500 @else border-white/10 @enderror rounded-xl px-4 py-3 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500">
                         @error('kontak_pelanggan')
-                            <p class="text-red-500 text-xs font-semibold ml-1">{{ $message }}</p>
-                        @else
-                            <p class="text-[10px] text-gray-400 italic ml-1">* Untuk notifikasi / panduan pembayaran</p>
+                        <p class="text-red-400 text-xs mt-2">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {{-- STEP 2: DETAIL PESANAN & PROMO --}}
-            <div class="bg-white/10 backdrop-blur-md rounded-4xl border border-white/10 p-6 shadow-xl">
-                <h3 class="flex items-center gap-3 font-bold mb-4 text-white">
-                    <span class="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-sm text-white">2</span>
+            {{-- STEP 2 --}}
+            <section class="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-xl">
+                <h3 class="flex items-center gap-3 text-white font-bold mb-5">
+                    <span class="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center">2</span>
                     Detail Pesanan
                 </h3>
 
-                <div class="flex items-center gap-5 bg-black/40 p-5 rounded-2xl border border-white/5 mb-4">
-                    <div class="w-16 h-20 md:w-20 md:h-28 bg-gray-800 rounded-lg overflow-hidden shrink-0 border border-white/10 shadow-lg">
-                        <img src="{{ $selectedProduct->gambar_produk ? asset('storage/' . $selectedProduct->gambar_produk) : asset('images/ebook-placeholder.png') }}" class="w-full h-full object-cover">
-                    </div>
-
-                    <div class="flex-1">
-                        <h4 class="text-lg md:text-xl font-black text-white leading-tight">{{ $selectedProduct->nama_produk }}</h4>
-                        <p class="text-xs text-gray-500 mt-2 line-clamp-2">{{ $selectedProduct->deskripsi_produk ?? 'Buku digital berformat PDF. Dikirim otomatis setelah pembayaran berhasil.' }}</p>
-                        <p class="text-[#DFFF00] font-black text-lg md:text-xl mt-2">Rp {{ number_format($selectedProduct->harga_produk, 0, ',', '.') }}</p>
+                <div class="flex gap-5 bg-black/40 p-5 rounded-2xl border border-white/5">
+                    <img src="{{ $selectedProduct->gambar_produk ? asset('storage/' . $selectedProduct->gambar_produk) : asset('images/ebook-placeholder.png') }}" class="w-20 h-24 object-cover rounded-xl">
+                    <div>
+                        <h4 class="text-xl font-black text-white">{{ $selectedProduct->nama_produk }}</h4>
+                        <p class="text-xs text-gray-400 mt-2">
+                            {{ $selectedProduct->deskripsi_produk ?? 'Buku digital PDF dikirim otomatis setelah pembayaran.' }}
+                        </p>
+                        <p class="text-blue-400 font-black text-xl mt-3">
+                            Rp {{ number_format($selectedProduct->harga_produk, 0, ',', '.') }}
+                        </p>
                     </div>
                 </div>
 
-                {{-- AREA PROMO --}}
-                <div class="pt-4 border-t border-white/10">
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase ml-1 mb-2">Punya Kode Promo?</label>
-                    <div class="flex gap-2">
-                        <input type="hidden" name="kode_promo" id="hidden_kode_promo" value="">
-                        <input type="text" id="input_kode_promo" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-blue-500 outline-none transition uppercase placeholder:text-gray-500" placeholder="MASUKKAN KODE...">
-                        <button type="button" id="btn_terapkan_promo" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-colors shadow-lg shadow-blue-600/30">Terapkan</button>
+                <div class="mt-5 border-t border-white/10 pt-5">
+                    <label class="text-[10px] text-gray-400 font-bold uppercase">Kode Promo</label>
+                    <div class="flex gap-3 mt-2">
+                        <input type="hidden" id="hidden_kode_promo" name="kode_promo">
+                        <input type="text" id="input_kode_promo" placeholder="MASUKKAN KODE..." class="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none">
+                        <button type="button" id="btn_terapkan_promo" class="px-6 bg-blue-600 rounded-xl text-white font-bold">
+                            Terapkan
+                        </button>
                     </div>
-                    <p id="pesan_promo" class="text-xs mt-2 font-semibold hidden ml-1"></p>
+                    <p id="pesan_promo" class="hidden text-xs mt-2 font-bold"></p>
                 </div>
-            </div>
+            </section>
 
-            {{-- STEP 3: METODE PEMBAYARAN --}}
-            <div class="bg-white/10 backdrop-blur-md rounded-4xl border border-white/10 p-6 shadow-xl mb-32">
-                <h3 class="flex items-center gap-3 font-bold mb-4 text-white">
-                    <span class="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-sm text-white">3</span>
-                    Metode Bayar
+            {{-- STEP 3 --}}
+            <section class="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-xl mb-32">
+                <h3 class="flex items-center gap-3 text-white font-bold mb-5">
+                    <span class="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center">3</span>
+                    Metode Pembayaran
                 </h3>
 
                 @error('metode_pembayaran')
-                <div class="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500 text-red-500 text-sm font-semibold">
+                <div class="bg-red-500/10 border border-red-500 rounded-xl p-3 text-red-400 text-sm mb-4">
                     Pilih metode pembayaran terlebih dahulu.
                 </div>
                 @enderror
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {{-- DANA --}}
+                    @foreach([
+                    ['dana', 'DANA'],
+                    ['gopay', 'GoPay'],
+                    ['bca_va', 'BCA VA'],
+                    ['echannel', 'MANDIRI VA']
+                    ] as $pay)
                     <label class="cursor-pointer">
-                        <input type="radio" name="metode_pembayaran" value="dana" class="hidden peer" {{ old('metode_pembayaran') == 'dana' ? 'checked' : '' }} required>
-                        <div class="h-14 rounded-xl border border-white/10 bg-black/30 flex items-center justify-center transition peer-checked:border-cyan-500 peer-checked:bg-cyan-500/10 hover:border-cyan-400">
-                            <span class="text-cyan-400 font-black text-sm uppercase">DANA</span>
+                        <input type="radio" name="metode_pembayaran" value="{{ $pay[0] }}" class="hidden peer" {{ old('metode_pembayaran') == $pay[0] ? 'checked' : '' }} required>
+                        <div class="h-14 bg-black/30 border border-white/10 rounded-xl flex items-center justify-center text-sm font-black text-white transition peer-checked:border-blue-500 peer-checked:bg-blue-500/10 hover:border-blue-400">
+                            {{ $pay[1] }}
                         </div>
                     </label>
-
-                    {{-- GOPAY --}}
-                    <label class="cursor-pointer">
-                        <input type="radio" name="metode_pembayaran" value="gopay" class="hidden peer" {{ old('metode_pembayaran') == 'gopay' ? 'checked' : '' }}>
-                        <div class="h-14 rounded-xl border border-white/10 bg-black/30 flex items-center justify-center transition peer-checked:border-green-500 peer-checked:bg-green-500/10 hover:border-green-400">
-                            <span class="text-green-400 font-black text-sm uppercase">GoPay</span>
-                        </div>
-                    </label>
-
-                    {{-- BCA VA --}}
-                    <label class="cursor-pointer">
-                        <input type="radio" name="metode_pembayaran" value="bca_va" class="hidden peer" {{ old('metode_pembayaran') == 'bca_va' ? 'checked' : '' }}>
-                        <div class="h-14 rounded-xl border border-white/10 bg-black/30 flex flex-col items-center justify-center transition peer-checked:border-blue-600 peer-checked:bg-blue-600/10 hover:border-blue-500">
-                            <span class="text-blue-500 font-black text-xs uppercase">BCA VA</span>
-                        </div>
-                    </label>
-
-                    {{-- MANDIRI VA --}}
-                    <label class="cursor-pointer">
-                        <input type="radio" name="metode_pembayaran" value="echannel" class="hidden peer" {{ old('metode_pembayaran') == 'echannel' ? 'checked' : '' }}>
-                        <div class="h-14 rounded-xl border border-white/10 bg-black/30 flex flex-col items-center justify-center transition peer-checked:border-yellow-500 peer-checked:bg-yellow-500/10 hover:border-yellow-400">
-                            <span class="text-yellow-500 font-black text-xs uppercase">MANDIRI VA</span>
-                        </div>
-                    </label>
+                    @endforeach
                 </div>
-            </div>
+            </section>
 
-            {{-- FLOATING BAR (STATIS + DINAMIS DISKON) --}}
-            <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl bg-black/60 backdrop-blur-2xl border border-white/20 p-4 rounded-3xl flex items-center justify-between shadow-2xl z-50">
+            {{-- FLOATING PAYMENT --}}
+            <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl bg-black/70 backdrop-blur-xl border border-white/20 p-4 rounded-3xl flex justify-between items-center shadow-2xl z-50">
                 <div>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">Total Pembayaran:</p>
-                    <p class="text-sm font-bold text-white truncate max-w-[150px] md:max-w-[300px]">{{ $selectedProduct->nama_produk }}</p>
-                    
-                    {{-- Tambahan Teks Diskon --}}
-                    <p id="tampil_diskon" class="text-xs text-green-400 font-bold hidden">- Diskon: Rp 0</p>
-                    
-                    {{-- ID pada Total Harga --}}
-                    <p id="tampil_total_akhir" class="text-xl font-black text-[#DFFF00]">Rp {{ number_format($selectedProduct->harga_produk, 0, ',', '.') }}</p>
+                    <p class="text-[10px] text-gray-400 uppercase">Total Pembayaran</p>
+                    <p class="text-sm text-white font-bold">
+                        {{ $selectedProduct->nama_produk }}
+                    </p>
+                    <p id="tampil_diskon" class="hidden text-xs text-green-400 font-bold">
+                        Diskon
+                    </p>
+                    <p id="tampil_total_akhir" class="text-xl text-blue-400 font-black">
+                        Rp {{ number_format($selectedProduct->harga_produk, 0, ',', '.') }}
+                    </p>
                 </div>
-                <button type="submit" class="bg-blue-600 px-6 py-3 md:px-8 md:py-4 rounded-2xl font-black text-sm text-white hover:bg-blue-500 transition-all active:scale-95 shadow-lg shadow-blue-600/30">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-8 py-3 rounded-2xl text-white font-black">
                     BELI SEKARANG
                 </button>
             </div>
@@ -157,83 +138,60 @@
     </form>
 </div>
 
-{{-- SCRIPT AJAX PROMO --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnPromo = document.getElementById('btn_terapkan_promo');
-        const inputPromo = document.getElementById('input_kode_promo');
-        const hiddenPromo = document.getElementById('hidden_kode_promo');
-        const pesanPromo = document.getElementById('pesan_promo');
-        const tampilDiskon = document.getElementById('tampil_diskon');
-        const tampilTotal = document.getElementById('tampil_total_akhir');
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('btn_terapkan_promo');
+        const input = document.getElementById('input_kode_promo');
+        const hidden = document.getElementById('hidden_kode_promo');
+        const msg = document.getElementById('pesan_promo');
 
-        // Harga statis karena e-book sudah di-lock oleh URL
-        const currentSelectedPrice = {{ $selectedProduct->harga_produk }};
-        let currentDiscount = 0;
+        btn.onclick = async () => {
+            let kode = input.value.trim();
 
-        btnPromo.addEventListener('click', async function() {
-            const kode = inputPromo.value.trim().toUpperCase();
+            if (!kode) return;
 
-            if (!kode) {
-                tampilkanPesan('Silakan masukkan kode promo.', 'text-red-500');
-                return;
-            }
-
-            btnPromo.textContent = 'Mengecek...';
-            btnPromo.disabled = true;
+            btn.innerHTML = "...";
 
             try {
-                const response = await fetch("{{ route('transaksi.cek-promo') }}", {
-                    method: 'POST',
+                let res = await fetch("{{ route('transaksi.cek-promo') }}", {
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({
                         kode_promo: kode,
-                        total_pembelian: currentSelectedPrice
+                        // SINTAKS BLADE DIRAPATKAN DI SINI
+                        total_pembelian: {{ $selectedProduct->harga_produk }}
                     })
                 });
 
-                const result = await response.json();
+                let data = await res.json();
+                msg.classList.remove('hidden');
 
-                if (result.status === 'success') {
-                    tampilkanPesan(result.message, 'text-green-500');
-                    hiddenPromo.value = kode;
-                    currentDiscount = result.potongan_harga;
+                if (data.status === "success") {
+                    hidden.value = kode;
+                    msg.className = "text-green-400 text-xs mt-2 font-bold";
+                    msg.innerHTML = data.message;
 
-                    // Update UI Harga di Floating Bar
-                    tampilDiskon.textContent = '- Diskon: Rp ' + new Intl.NumberFormat('id-ID').format(currentDiscount);
-                    tampilDiskon.classList.remove('hidden');
+                    document.getElementById('tampil_diskon').classList.remove('hidden');
+                    document.getElementById('tampil_diskon').innerHTML = "- Diskon Rp " + new Intl.NumberFormat('id-ID').format(data.potongan_harga);
 
-                    const totalAkhir = Math.max(0, currentSelectedPrice - currentDiscount);
-                    tampilTotal.textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(totalAkhir);
+                    // SINTAKS BLADE DIRAPATKAN DI SINI
+                    let totalAkhir = Math.max(0, {{ $selectedProduct->harga_produk }} - data.potongan_harga);
+                    
+                    document.getElementById('tampil_total_akhir').innerHTML = "Rp " + new Intl.NumberFormat('id-ID').format(totalAkhir);
                 } else {
-                    tampilkanPesan(result.message, 'text-red-500');
-                    resetPromoUI();
+                    msg.className = "text-red-400 text-xs mt-2 font-bold";
+                    msg.innerHTML = data.message;
                 }
             } catch (error) {
-                tampilkanPesan('Terjadi kesalahan jaringan atau server.', 'text-red-500');
-                resetPromoUI();
-            } finally {
-                btnPromo.textContent = 'Terapkan';
-                btnPromo.disabled = false;
+                msg.classList.remove('hidden');
+                msg.className = "text-red-400 text-xs mt-2 font-bold";
+                msg.innerHTML = "Terjadi kesalahan sistem.";
             }
-        });
 
-        function tampilkanPesan(text, colorClass) {
-            pesanPromo.textContent = text;
-            // Hapus semua class warna sebelumnya lalu tambahkan yang baru
-            pesanPromo.classList.remove('text-red-500', 'text-green-500', 'text-yellow-500');
-            pesanPromo.classList.add(colorClass);
-            pesanPromo.classList.remove('hidden');
-        }
-
-        function resetPromoUI() {
-            hiddenPromo.value = '';
-            currentDiscount = 0;
-            tampilDiskon.classList.add('hidden');
-            tampilTotal.textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(currentSelectedPrice);
+            btn.innerHTML = "Terapkan";
         }
     });
 </script>
